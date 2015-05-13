@@ -1,44 +1,35 @@
 #!/bin/bash
 #
-# Read the raw METBK data files for the Endurance Coastal Surface Moorings and
+# Read the raw CTDBP data files for the Endurance Coastal Surface Moorings and
 # create parsed datasets available in Matlab formatted .MAT files for further
 # processing and review.
 #
 # Wingard, C. 2015-04-17
 
-# TODO: Convert this to accept input arguements for platform and deployment names
+# Parse the command line inputs
+if [ $# -ne 6 ]; then
+    echo "$0: required inputs are the platform and deployment names, the DCL"
+    echo "number, the CTDBP name, a switch to indicate what data is available"
+    echo "in the data files, and the name of the file to process."
+    echo "     example: $0 ce01issm D00001 dlc16 ctdbp1 3 20150505.ctdbp.log"
+    exit 1
+fi
+PLATFORM=${1,,}
+DEPLOY=${2^^}
+DCL=${3,,}
+CTDBP=${4,,}
+SWITCH=$5
+FILE=`/bin/basename $6`
 
-RAW="/home/nereus/data/Deployments/2014_October/recovered"
-PARSED="/home/nereus/data/Moorings/parsed"
+# Set the default directory paths
+RAW="/home/ooiuser/data/raw"
+PARSED="/home/ooiuser/data/parsed"
+BIN="/home/ooiuser/bin/cgsn-parsers/parsers"
+PYTHON="/opt/python2.7.9/bin/python"
 
-# CE01ISSM
-OUT="$PARSED/ce01issm/R00002/ctdbp1"
-for raw in $RAW/CE01ISSM/cg_data/dcl16/ctdbp1/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_ctdbp.py -i $raw -o $OUT/${FILE%.log}.mat -s 2
-done
+# Setup the input and output filenames as well as the absolute paths
+IN="$RAW/$PLATFORM/$DEPLOY/$DCL/$CTDBP/$FILE"
+OUT="$PARSED/$PLATFORM/$DEPLOY/$CTDBP/${FILE%.log}.mat"
 
-OUT="$PARSED/ce01issm/R00002/ctdbp2"
-for raw in $RAW/CE01ISSM/cg_data/dcl37/ctdbp2/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_ctdbp.py -i $raw -o $OUT/${FILE%.log}.mat -s 2
-done
-
-OUT="$PARSED/ce01issm/R00002/ctdbp3"
-for raw in $RAW/CE01ISSM/cg_data/dcl17/ctdbp3/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_ctdbp.py -i $raw -o $OUT/${FILE%.log}.mat -s 3
-done
-
-# CE06ISSM
-OUT="$PARSED/ce06issm/R00001/ctdbp1"
-for raw in $RAW/CE06ISSM/cg_data/dcl16/ctdbp1/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_ctdbp.py -i $raw -o $OUT/${FILE%.log}.mat -s 2
-done
-
-OUT="$PARSED/ce06issm/R00001/ctdbp3"
-for raw in $RAW/CE06ISSM/cg_data/dcl17/ctdbp3/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_ctdbp.py -i $raw -o $OUT/${FILE%.log}.mat -s 3
-done
+# Parse the file
+$PYTHON $BIN/parse_ctdbp.py -i $IN -o $OUT -s $SWITCH

@@ -1,40 +1,32 @@
 #!/bin/bash
 #
-# Read the raw METBK data files for the Endurance Coastal Surface Moorings and
-# create parsed datasets available in Matlab formatted .MAT files for further
-# processing and review.
+# Read the CPM Supervisor log files for the Endurance Coastal Surface Moorings
+# and create parsed datasets available in Matlab formatted .MAT files for
+# further processing and review.
 #
 # Wingard, C. 2015-04-17
 
-# TODO: Convert this to accept input arguements for platform and deployment names
+# Parse the command line inputs
+if [ $# -ne 4 ]; then
+    echo "$0: required inputs are the platform and deployment names,"
+    echo "the name of the CPM, and the name of the file to process."
+    echo "     example: $0 ce01issm D00001 cpm1 20150505.superv.log"
+    exit 1
+fi
+PLATFORM=${1,,}
+DEPLOY=${2^^}
+CPM=${3,,}
+FILE=`/bin/basename $4`
 
-RAW="/home/nereus/data/Moorings/raw"
-PARSED="/home/nereus/data/Moorings/parsed"
+# Set the default directory paths
+RAW="/home/ooiuser/data/raw"
+PARSED="/home/ooiuser/data/parsed"
+BIN="/home/ooiuser/bin/cgsn-parsers/parsers"
+PYTHON="/opt/python2.7.9/bin/python"
 
-# CE02SHSM
-OUT="$PARSED/ce02shsm/D00001/superv/cpm1"
-for raw in $RAW/ce02shsm/D00001/cg_data/superv/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_superv_cpm.py -i $raw -o $OUT/${FILE%.log}.mat
-done
+# Setup the input and output filenames as well as the absolute paths
+IN="$RAW/$PLATFORM/$DEPLOY/$CPM/superv/$FILE"
+OUT="$PARSED/$PLATFORM/$DEPLOY/superv/$CPM/${FILE%.log}.mat"
 
-# CE04OSSM
-OUT="$PARSED/ce04ossm/D00001/superv/cpm1"
-for raw in $RAW/ce04ossm/D00001/cg_data/superv/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_superv_cpm.py -i $raw -o $OUT/${FILE%.log}.mat
-done
-
-# CE07SHSM
-OUT="$PARSED/ce07shsm/D00001/superv/cpm1"
-for raw in $RAW/ce07shsm/D00001/cg_data/superv/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_superv_cpm.py -i $raw -o $OUT/${FILE%.log}.mat
-done
-
-# CE02SHSM
-OUT="$PARSED/ce09ossm/D00001/superv/cpm1"
-for raw in $RAW/ce09ossm/D00001/cg_data/superv/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_superv_cpm.py -i $raw -o $OUT/${FILE%.log}.mat
-done
+# Parse the file
+$PYTHON $BIN/parse_superv_cpm.py -i $IN -o $OUT

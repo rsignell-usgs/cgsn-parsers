@@ -1,52 +1,33 @@
 #!/bin/bash
 #
-# Read the raw METBK data files for the Endurance Coastal Surface Moorings and
+# Read the raw ADCP data files for the Endurance Coastal Surface Moorings and
 # create parsed datasets available in Matlab formatted .MAT files for further
 # processing and review.
 #
 # Wingard, C. 2015-04-17
 
-# TODO: Convert this to accept input arguements for platform and deployment names
+# Parse the command line inputs
+if [ $# -ne 5 ]; then
+    echo "$0: required inputs are the platform and deployment names, the DCL"
+    echo "number, the ADCP name and the name of the file to process."
+    echo "     example: $0 ce01issm D00001 dlc25 adcpt 20150505.adcpt.log"
+    exit 1
+fi
+PLATFORM=${1,,}
+DEPLOY=${2^^}
+DCL=${3,,}
+ADCP=${4,,}
+FILE=`/bin/basename $5`
 
-RAW="/home/nereus/data/Moorings/raw"
-PARSED="/home/nereus/data/Moorings/parsed"
+# Set the default directory paths
+RAW="/home/ooiuser/data/raw"
+PARSED="/home/ooiuser/data/parsed"
+BIN="/home/ooiuser/bin/cgsn-parsers/parsers"
+PYTHON="/opt/python2.7.9/bin/python"
 
-# CE02SHSM
-OUT="$PARSED/ce02shsm/D00001/adcpt"
-for raw in $RAW/ce02shsm/D00001/cg_data/dcl26/adcpt/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_adcp.py -i $raw -o $OUT/${FILE%.log}.mat
-done
+# Setup the input and output filenames as well as the absolute paths
+IN="$RAW/$PLATFORM/$DEPLOY/$DCL/$ADCP/$FILE"
+OUT="$PARSED/$PLATFORM/$DEPLOY/$ADCP/${FILE%.log}.mat"
 
-# CE04OSSM
-OUT="$PARSED/ce04ossm/D00001/adcpt"
-for raw in $RAW/ce04ossm/D00001/cg_data/dcl26/adcpt/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_adcp.py -i $raw -o $OUT/${FILE%.log}.mat
-done
-
-# CE07SHSM
-OUT="$PARSED/ce07shsm/D00001/adcpt1"
-for raw in $RAW/ce07shsm/D00001/cg_data/dcl26/adcpt1/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_adcp.py -i $raw -o $OUT/${FILE%.log}.mat
-done
-
-OUT="$PARSED/ce07shsm/D00001/adcpt2"
-for raw in $RAW/ce07shsm/D00001/cg_data/dcl35/adcpt2/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_adcp.py -i $raw -o $OUT/${FILE%.log}.mat
-done
-
-# CE02SHSM
-OUT="$PARSED/ce09ossm/D00001/adcpt"
-for raw in $RAW/ce09ossm/D00001/cg_data/dcl26/adcpt/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_adcp.py -i $raw -o $OUT/${FILE%.log}.mat
-done
-
-OUT="$PARSED/ce09ossm/D00001/adcps"
-for raw in $RAW/ce09ossm/D00001/cg_data/dcl35/adcps/*.log; do
-    FILE=`basename $raw`
-    python ../parsers/parse_adcp.py -i $raw -o $OUT/${FILE%.log}.mat
-done
+# Parse the file
+$PYTHON $BIN/parse_adcp.py -i $IN -o $OUT

@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Read the raw METBK data files for the Endurance Coastal Surface Moorings and
-# create parsed datasets available in Matlab formatted .MAT files for further
-# processing and review.
+# Read the raw Power System log files for the Endurance Coastal Surface
+# Moorings and create parsed datasets available in Matlab formatted .MAT files
+# for further processing and review.
 #
 # Wingard, C. 2015-04-17
 
@@ -10,7 +10,7 @@
 if [ $# -ne 3 ]; then
     echo "$0: required inputs are the platform and deployment names,"
     echo "in that order, and the name of the file to process."
-    echo "     example: $0 ce01issm D00001 20150505.metbk.log"
+    echo "     example: $0 ce01issm D00001 20150505.pwrsys.log"
     exit 1
 fi
 PLATFORM=${1,,}
@@ -24,8 +24,8 @@ BIN="/home/ooiuser/bin/cgsn-parsers/parsers"
 PYTHON="/opt/python2.7.9/bin/python"
 
 # Setup the input and output filenames as well as the absolute paths
-IN="$RAW/$PLATFORM/$DEPLOY/dcl11/metbk/$FILE"
-OUT="$PARSED/$PLATFORM/$DEPLOY/metbk/${FILE%.log}.mat"
+IN="$RAW/$PLATFORM/$DEPLOY/pwrsys/$FILE"
+OUT="$PARSED/$PLATFORM/$DEPLOY/pwrsys/${FILE%.log}.mat"
 
 # Parse the file
-$PYTHON $BIN/parse_metbk.py -i $IN -o $OUT
+$PYTHON $BIN/parse_pwrsys.py -i $IN -o $OUT

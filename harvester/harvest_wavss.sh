@@ -28,4 +28,4 @@ IN="$RAW/$PLATFORM/$DEPLOY/dcl12/wavss/$FILE"
 OUT="$PARSED/$PLATFORM/$DEPLOY/wavss/${FILE%.log}.mat"
 
 # Parse the file
-$PYTHON $BIN/parse_wavss.py -i $IN -o $OUT
+[ -e $IN ] && $PYTHON $BIN/parse_wavss.py -i $IN -o $OUT

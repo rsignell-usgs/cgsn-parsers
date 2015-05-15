@@ -28,4 +28,4 @@ IN="$RAW/$PLATFORM/$DEPLOY/dcl11/metbk/$FILE"
 OUT="$PARSED/$PLATFORM/$DEPLOY/metbk/${FILE%.log}.mat"
 
 # Parse the file
-$PYTHON $BIN/parse_metbk.py -i $IN -o $OUT
+[ -e $IN ] && $PYTHON $BIN/parse_metbk.py -i $IN -o $OUT

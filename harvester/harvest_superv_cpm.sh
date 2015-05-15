@@ -7,7 +7,7 @@
 # Wingard, C. 2015-04-17
 
 # Parse the command line inputs
-if [ $# -ne 4 ]; then
+if [ $# -ne 5 ]; then
     echo "$0: required inputs are the platform and deployment names,"
     echo "the name of the CPM, and the name of the file to process."
     echo "     example: $0 ce01issm D00001 cpm1 20150505.superv.log"
@@ -16,7 +16,8 @@ fi
 PLATFORM=${1,,}
 DEPLOY=${2^^}
 CPM=${3,,}
-FILE=`/bin/basename $4`
+BASE=$4
+FILE=`/bin/basename $5`
 
 # Set the default directory paths
 RAW="/home/ooiuser/data/raw"
@@ -25,8 +26,12 @@ BIN="/home/ooiuser/bin/cgsn-parsers/parsers"
 PYTHON="/opt/python2.7.9/bin/python"
 
 # Setup the input and output filenames as well as the absolute paths
-IN="$RAW/$PLATFORM/$DEPLOY/$CPM/superv/$FILE"
+if [ $BASE == 0 ]; then
+    IN="$RAW/$PLATFORM/$DEPLOY/superv/$FILE"
+else
+    IN="$RAW/$PLATFORM/$DEPLOY/$CPM/superv/$FILE"
+fi
 OUT="$PARSED/$PLATFORM/$DEPLOY/superv/$CPM/${FILE%.log}.mat"
 
 # Parse the file
-$PYTHON $BIN/parse_superv_cpm.py -i $IN -o $OUT
+[ -e $IN ] && $PYTHON $BIN/parse_superv_cpm.py -i $IN -o $OUT

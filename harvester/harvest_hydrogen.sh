@@ -30,4 +30,4 @@ IN="$RAW/$PLATFORM/$DEPLOY/$DCL/$HYD/$FILE"
 OUT="$PARSED/$PLATFORM/$DEPLOY/$HYD/${FILE%.log}.mat"
 
 # Parse the file
-$PYTHON $BIN/parse_hydrogen.py -i $IN -o $OUT
+[ -e $IN ] && $PYTHON $BIN/parse_hydrogen.py -i $IN -o $OUT

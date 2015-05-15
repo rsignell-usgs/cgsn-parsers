@@ -28,4 +28,4 @@ IN="$RAW/$PLATFORM/$DEPLOY/pwrsys/$FILE"
 OUT="$PARSED/$PLATFORM/$DEPLOY/pwrsys/${FILE%.log}.mat"
 
 # Parse the file
-$PYTHON $BIN/parse_pwrsys.py -i $IN -o $OUT
+[ -e $IN ] && $PYTHON $BIN/parse_pwrsys.py -i $IN -o $OUT

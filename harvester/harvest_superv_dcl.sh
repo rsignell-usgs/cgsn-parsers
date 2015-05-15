@@ -29,4 +29,4 @@ IN="$RAW/$PLATFORM/$DEPLOY/$DCL/superv/$FILE"
 OUT="$PARSED/$PLATFORM/$DEPLOY/superv/$DCL/${FILE%.log}.mat"
 
 # Parse the file
-$PYTHON $BIN/parse_superv_dcl.py -i $IN -o $OUT
+[ -e $IN ] && $PYTHON $BIN/parse_superv_dcl.py -i $IN -o $OUT

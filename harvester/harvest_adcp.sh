@@ -30,4 +30,4 @@ IN="$RAW/$PLATFORM/$DEPLOY/$DCL/$ADCP/$FILE"
 OUT="$PARSED/$PLATFORM/$DEPLOY/$ADCP/${FILE%.log}.mat"
 
 # Parse the file
-$PYTHON $BIN/parse_adcp.py -i $IN -o $OUT
+[ -e $IN ] && $PYTHON $BIN/parse_adcp.py -i $IN -o $OUT

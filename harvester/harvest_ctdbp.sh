@@ -32,4 +32,4 @@ IN="$RAW/$PLATFORM/$DEPLOY/$DCL/$CTDBP/$FILE"
 OUT="$PARSED/$PLATFORM/$DEPLOY/$CTDBP/${FILE%.log}.mat"
 
 # Parse the file
-$PYTHON $BIN/parse_ctdbp.py -i $IN -o $OUT -s $SWITCH
+[ -e $IN ] && $PYTHON $BIN/parse_ctdbp.py -i $IN -o $OUT -s $SWITCH

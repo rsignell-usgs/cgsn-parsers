@@ -90,7 +90,7 @@ $HARVEST/harvest_ctdbp.sh $PLATFORM $DEPLOY dcl27 $CTDBP 1 $FNAME.$CTDBP.log
 # Washington MFN
 if [ $MFN_FLAG == 1 ]; then
     # CPM3
-    $HARVEST/harvest_superv_dcl.sh $PLATFORM $DEPLOY cpm3 1 $FNAME.superv.log
+    $HARVEST/harvest_superv_cpm.sh $PLATFORM $DEPLOY cpm3 1 $FNAME.superv.log
     
     # DCL35
     $HARVEST/harvest_superv_dcl.sh $PLATFORM $DEPLOY dcl35 $FNAME.superv.log

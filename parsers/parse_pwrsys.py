@@ -18,27 +18,28 @@ from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
 
 # Regex pattern for the power system records
 PATTERN = (
-    DCL_TIMESTAMP + r'\s+PwrSys\s+psc:\s+' +
-    FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + 
-    r'([0-9a-f]{4})\s+([0-9a-f]{8})\s+([0-9a-f]{8})\s+' +
-    r'pv1\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'pv2\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'pv3\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'pv4\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'wt1\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'wt2\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'fc1\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'fc2\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'bt1\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'bt2\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'bt3\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'bt4\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'ext\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'int\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'fcl\s+' + FLOAT + r'\s+' + 
-    r'swg\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'cvt\s+([0-1]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'([0-1]{1})\s+' + FLOAT + r'\s+([0-9a-f]{8})\s+' +
+    DCL_TIMESTAMP + r'\sPwrSys\spsc:\s' +
+    FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'([0-9a-f]{4})\s([0-9a-f]{8})\s([0-9a-f]{8})\s' +
+    r'pv1\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'pv2\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'pv3\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'pv4\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'wt1\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'wt2\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'fc1\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'fc2\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'bt1\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'bt2\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'bt3\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'bt4\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'ext\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'int\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'fcl\s' + FLOAT + r'\s' + 
+    r'swg\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'cvt\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'([0-1]{1})\s' + FLOAT + r'\s([0-9a-f]{8})\s' +
+    r'(?:No_FC_Data\s)?' +
     r'([0-9a-f]{4})' + NEWLINE
 )
 REGEX = re.compile(PATTERN, re.DOTALL)

@@ -17,7 +17,7 @@ from calendar import timegm
 from pytz import timezone
 
 # Regex strings for use with the majority of parsers
-DCL_TIMESTAMP = r'(\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2}.\d{3})'
+DCL_TIMESTAMP = r'(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})'
 FLOAT = r'([+-]?\d+.\d+[Ee]?[+-]?\d*)'  # includes scientific notation
 INTEGER = r'([+-]?[0-9]+)'
 NEWLINE = r'(?:\r\n|\n)?'

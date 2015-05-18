@@ -14,15 +14,11 @@ if [ $# -ne 3 ]; then
 fi
 PLATFORM=${1,,}
 DEPLOY=${2^^}
-TIME=${3}
+TIME="-$3 day"
+FNAME=`date -u +%Y%m%d --date="$TIME"`
 
 RAW="/home/ooiuser/data/raw"
 HARVEST="/home/ooiuser/bin/cgsn-parsers/harvester"
-if [ $TIME == 0 ]; then
-    FNAME=`date -u +%Y%m%d`
-else
-    FNAME=`date -u +%Y%m%d --date='-1 day'`
-fi
 
 # Set some instrument names and processing flags based on the platform name
 case "$PLATFORM" in
@@ -90,7 +86,7 @@ $HARVEST/harvest_ctdbp.sh $PLATFORM $DEPLOY dcl27 $CTDBP 1 $FNAME.$CTDBP.log
 # Washington MFN
 if [ $MFN_FLAG == 1 ]; then
     # CPM3
-    $HARVEST/harvest_superv_cpm.sh $PLATFORM $DEPLOY cpm3 1 $FNAME.superv.log
+    $HARVEST/harvest_superv_cpm.sh $PLATFORM $DEPLOY cpm3 1 $FNAME.superv.log    
     
     # DCL35
     $HARVEST/harvest_superv_dcl.sh $PLATFORM $DEPLOY dcl35 $FNAME.superv.log

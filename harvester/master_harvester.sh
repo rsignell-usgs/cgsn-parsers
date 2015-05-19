@@ -15,7 +15,7 @@ fi
 PLATFORM=${1,,}
 DEPLOY=${2^^}
 TIME="-$3 day"
-FNAME=`date -u +%Y%m%d --date="$TIME"`
+FNAME=`/bin/date -u +%Y%m%d --date="$TIME"`
 
 RAW="/home/ooiuser/data/raw"
 HARVEST="/home/ooiuser/bin/cgsn-parsers/harvester"

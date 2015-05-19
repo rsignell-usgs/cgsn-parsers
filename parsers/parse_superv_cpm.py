@@ -17,28 +17,27 @@ from common import ParameterNames, Parser
 from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, NEWLINE
 
 
-# Regex pattern for a line with a DCL time stamp, possible DCL status value and
-# the 12 following met data values.
+# Regex pattern for a line with a DCL time stamp
 PATTERN = (
-    DCL_TIMESTAMP + r'\s+superv\s+cpm:\s+' +
-    FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + r'([0-9a-f]{8})\s+' +
-    r't\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'h\s+' + FLOAT + r'\s+'
-    r'p\s+' + FLOAT + r'\s+'
-    r'gf\s+([0-9a-f]{1})\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' +
-    r'ld\s+([0-9a-f]{1})\s+' + INTEGER + r'\s+' + INTEGER + r'\s+' +
-    r'hb\s+([0-1]+)\s+' + INTEGER + r'\s+' + INTEGER + r'\s+' +
-    r'wake\s+([0-9]{2})\s+' +
-    r'ir\s+([+-]?[0-1]+)\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + r'([0-2])\s+' +
-    r'fwwf\s+([+-]?[0-1]+)\s+' + FLOAT + r'\s+' + FLOAT + r'\s+' + r'([0-3])\s+' +
-    r'gps\s+([0-1]+)\s+' +
-    r'sbd\s+([0-1]+)\s+([0-1]+)\s+' +
-    r'pps\s+([0-1]+)\s+' +
-    r'dcl\s+([0-9a-f]{2})\s+' +
-    r'wtc\s+' + FLOAT + r'\s+' +
-    r'wpc\s+' + INTEGER + r'\s+' +
-    r'esw\s+([0-3]+)\s+' +
-    r'dsl\s+([0-1]+)\s+' +
+    DCL_TIMESTAMP + r'\ssuperv\scpm:\s' +
+    FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' + r'([0-9a-f]{8})\s' +
+    r't\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'h\s' + FLOAT + r'\s'
+    r'p\s' + FLOAT + r'\s'
+    r'gf\s([0-9a-f]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' +
+    r'ld\s([0-9a-f]{1})\s' + INTEGER + r'\s' + INTEGER + r'\s' +
+    r'hb\s([0-1]+)\s' + INTEGER + r'\s' + INTEGER + r'\s' +
+    r'wake\s([0-9]{2})\s' +
+    r'ir\s([+-]?[0-1]+)\s' + FLOAT + r'\s' + FLOAT + r'\s' + r'([0-2])\s' +
+    r'fwwf\s([0-3]+)\s' + FLOAT + r'\s' + FLOAT + r'\s' + r'([0-3]+)\s' +
+    r'gps\s([0-1]+)\s' +
+    r'sbd\s([0-1]+)\s([0-1]+)\s' +
+    r'pps\s([0-1]+)\s' +
+    r'dcl\s([0-9a-f]{2})\s' +
+    r'wtc\s' + FLOAT + r'\s' +
+    r'wpc\s' + INTEGER + r'\s' +
+    r'esw\s([0-3]+)\s' +
+    r'dsl\s([0-1]+)\s' +
     r'([0-9a-f]{4})' + NEWLINE
 )
 REGEX = re.compile(PATTERN, re.DOTALL)

@@ -30,9 +30,8 @@ class ParameterNames(object):
     when called by the individual parsers.
     '''
     # Initialize Parameter names with time as the only default parameter
-    parameters = [
-        'time'
-    ]
+    def __init__(self, parameters=[]):
+        self.parameters = ['time'] + parameters
 
     # Create the initial dictionary object.
     def create_dict(self):
@@ -42,13 +41,13 @@ class ParameterNames(object):
         '''
         bunch = Bunch()
 
-        for name in ParameterNames.parameters:
+        for name in self.parameters:
             bunch[name] = []
 
         return bunch
 
 
-class Parser(object):
+class ParserCommon(object):
     """
     A Parser class that begins the process of extracting data records from the
     DCL log files.
@@ -57,12 +56,12 @@ class Parser(object):
     using either readlines (if the file is ascii), or read if the file is a
     pure binary file.
     """
-    def __init__(self, infile):
+    def initialize(self, infile, parameters):
         # set the infile name and path
         self.infile = infile
 
         # initialize the data dictionary using the names defined above
-        data = ParameterNames()
+        data = ParameterNames(parameters)
         self.data = data.create_dict()
         self.raw = None
 

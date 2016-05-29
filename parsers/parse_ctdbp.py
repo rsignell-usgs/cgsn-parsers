@@ -13,7 +13,7 @@ import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
+from common import ParameterNames, ParserCommon
 from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, NEWLINE
 
 # Set regex strings to just find the CTD data (with options for DOSTA or FLORT).
@@ -67,7 +67,7 @@ class ParameterNames(ParameterNames):
             ])
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the CTDBP specific
     methods to parse the data, and extracts the CTDBP data records from the DCL
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     ctd_type = args.switch
 
     # initialize the Parser object for CTDBP
-    ctdbp = Parser(infile, ctd_type)
+    ctdbp = ParserCommon(infile, ctd_type)
 
     # load the data into a buffered object and parse the data into a dictionary
     ctdbp.load_ascii()

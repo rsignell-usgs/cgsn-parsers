@@ -13,7 +13,7 @@ import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
+from common import ParameterNames, ParserCommon
 from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
 
 
@@ -38,32 +38,30 @@ PATTERN = (
 REGEX = re.compile(PATTERN, re.DOTALL)
 
 
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the METBK (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
-        'dcl_date_time_string',
-        'barometric_pressure',
-        'relative_humidity',
-        'air_temperature',
-        'longwave_irradiance',
-        'precipitation_level',
-        'sea_surface_temperature',
-        'sea_surface_conductivity',
-        'shortwave_irradiance',
-        'eastward_wind_velocity',
-        'northward_wind_velocity'
-    ])
+_parameter_names_metbk = [
+    'dcl_date_time_string',
+    'barometric_pressure',
+    'relative_humidity',
+    'air_temperature',
+    'longwave_irradiance',
+    'precipitation_level',
+    'sea_surface_temperature',
+    'sea_surface_conductivity',
+    'shortwave_irradiance',
+    'eastward_wind_velocity',
+    'northward_wind_velocity'
+]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the METBK specific
     methods to parse the data, and extracts the METBK data records from the DCL
     daily log files.
     """
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_metbk)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression

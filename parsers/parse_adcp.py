@@ -25,7 +25,7 @@ from bunch import Bunch
 from struct import unpack
 
 # Import common utilites and base classes
-from common import Parser
+from common import ParserCommon
 from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, NEWLINE
 
 # Regex set to find the start of a PD0 packet (DCL timestamp and the first 6 
@@ -234,7 +234,7 @@ class ParameterNames(object):
         return bunch
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser class that extracts the data records from a PD0 data packet 
     formatted in ASCIIHEX produced by a Teledyne RDI Workhorse ADCP.
@@ -648,7 +648,7 @@ if __name__ == '__main__':
     outfile = os.path.abspath(args.outfile)
 
     # initialize the Parser object for PWRSYS
-    adcp = Parser(infile)
+    adcp = ParserCommon(infile)
 
     # load the data into a buffered object and parse the data into a dictionary
     adcp.load_ascii()

@@ -13,7 +13,7 @@ import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, ParserCommon
+from common import ParserCommon
 from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
 
 

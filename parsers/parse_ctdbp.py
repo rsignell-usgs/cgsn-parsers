@@ -23,7 +23,7 @@ CTD_DATE = r'(\d{2}\s\w{3}\s\d{4}\s\d{2}:\d{2}:\d{2})'
 
 BASE_PATTERN = (
     DCL_TIMESTAMP + r'\s+' +    # DCL Time-Stamp
-    r'(?:\[\w*:\w*\]:\s*)*' +   # DCL logger ID (may not be present)
+    r'(?:\[\w*:\w*\]:|\#)*\s+' +   # DCL logger ID (may not be present)
     FLOAT + r',\s+' +           # temperature
     FLOAT + r',\s+' +           # conductivity
     FLOAT + r',\s+'             # pressure

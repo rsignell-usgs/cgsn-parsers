@@ -13,7 +13,7 @@ import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
+from common import ParameterNames, ParserCommon
 from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
 
 
@@ -38,7 +38,7 @@ class ParameterNames(ParameterNames):
     ])
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the METBK specific
     methods to parse the data, and extracts the METBK data records from the DCL
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     outfile = os.path.abspath(args.outfile)
 
     # initialize the Parser object for hydrogen
-    hydrogen = Parser(infile)
+    hydrogen = ParserCommon(infile)
 
     # load the data into a buffered object and parse the data into a dictionary
     hydrogen.load_ascii()

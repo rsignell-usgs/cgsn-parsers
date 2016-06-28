@@ -13,7 +13,7 @@ import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
+from common import ParserCommon
 from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, NEWLINE
 
 # Set regex strings to just find the CTD data (with options for DOSTA or FLORT).
@@ -23,7 +23,7 @@ CTD_DATE = r'(\d{2}\s\w{3}\s\d{4}\s\d{2}:\d{2}:\d{2})'
 
 BASE_PATTERN = (
     DCL_TIMESTAMP + r'\s+' +    # DCL Time-Stamp
-    r'(?:\[\w*:\w*\]:\s*)*' +   # DCL logger ID (may not be present)
+    r'(?:\[\w*:\w*\]:|\#)*\s+' +   # DCL logger ID (may not be present)
     FLOAT + r',\s+' +           # temperature
     FLOAT + r',\s+' +           # conductivity
     FLOAT + r',\s+'             # pressure
@@ -34,75 +34,67 @@ CTDBP2 = BASE_PATTERN + DOSTA + CTD_DATE + NEWLINE
 CTDBP3 = BASE_PATTERN + FLORT + CTD_DATE + NEWLINE
 
 
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the CTDBP (time is already
-    declared in the base class).
-    '''
-    def __init__(self, ctd_type):
-        ParameterNames.parameters.extend([
-            'dcl_date_time_string',
-            'temperature',
-            'conductivity',
-            'pressure'
+def _get_parameter_names_ctdbp(ctd_type):
+    parameter_names = [
+        'dcl_date_time_string',
+        'temperature',
+        'conductivity',
+        'pressure'
+        ]
+
+    if ctd_type == 1:
+        parameter_names.extend([
+            'ctd_date_time_string'
         ])
 
-        if ctd_type == 1:
-            ParameterNames.parameters.extend([
-                'ctd_date_time_string'
-            ])
+    if ctd_type == 2:
+        parameter_names.extend([
+            'oxygen_concentration',
+            'ctd_date_time_string'
+        ])
 
-        if ctd_type == 2:
-            ParameterNames.parameters.extend([
-                'oxygen_concentration',
-                'ctd_date_time_string'
-            ])
+    if ctd_type == 3:
+        parameter_names.extend([
+            'raw_backscatter',
+            'raw_chlorophyll',
+            'raw_cdom',
+            'ctd_date_time_string'
+        ])
 
-        if ctd_type == 3:
-            ParameterNames.parameters.extend([
-                'raw_backscatter',
-                'raw_chlorophyll',
-                'raw_cdom',
-                'ctd_date_time_string'
-            ])
+    return parameter_names
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the CTDBP specific
     methods to parse the data, and extracts the CTDBP data records from the DCL
     daily log files.
     """
     def __init__(self, infile, ctd_type):
-        # set the infile name and path
-        self.infile = infile
+        self.initialize(infile, _get_parameter_names_ctdbp(ctd_type))
         self.ctd_type = ctd_type
 
-        # initialize the data dictionary using the names defined above
-        data = ParameterNames(ctd_type)
-        self.data = data.create_dict()
-
-    def parse_data(self, ctd_type):
+    def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression
         above) in the data object, and parse the data into a pre-defined
         dictionary object created using the Bunch class.
         '''
-        if ctd_type == 1:
+        if self.ctd_type == 1:
             REGEX = re.compile(CTDBP1, re.DOTALL)
 
-        if ctd_type == 2:
+        if self.ctd_type == 2:
             REGEX = re.compile(CTDBP2, re.DOTALL)
 
-        if ctd_type == 3:
+        if self.ctd_type == 3:
             REGEX = re.compile(CTDBP3, re.DOTALL)
 
         for line in self.raw:
             match = REGEX.match(line)
             if match:
-                self._build_parsed_values(match, ctd_type)
+                self._build_parsed_values(match)
 
-    def _build_parsed_values(self, match, ctd_type):
+    def _build_parsed_values(self, match):
         """
         Extract the data from the relevant regex groups and assign to elements
         of the data dictionary.
@@ -118,14 +110,14 @@ class Parser(Parser):
         self.data.conductivity.append(float(match.group(3)))
         self.data.pressure.append(float(match.group(4)))
 
-        if ctd_type == 1:
+        if self.ctd_type == 1:
             self.data.ctd_date_time_string.append(match.group(5))
 
-        if ctd_type == 2:
+        if self.ctd_type == 2:
             self.data.oxygen_concentration.append(match.group(5))
             self.data.ctd_date_time_string.append(match.group(6))
 
-        if ctd_type == 3:
+        if self.ctd_type == 3:
             self.data.raw_backscatter.append(match.group(5))
             self.data.raw_chlorophyll.append(match.group(6))
             self.data.raw_cdom.append(match.group(7))
@@ -140,7 +132,7 @@ if __name__ == '__main__':
     ctd_type = args.switch
 
     # initialize the Parser object for CTDBP
-    ctdbp = Parser(infile, ctd_type)
+    ctdbp = ParserCommon(infile, ctd_type)
 
     # load the data into a buffered object and parse the data into a dictionary
     ctdbp.load_ascii()

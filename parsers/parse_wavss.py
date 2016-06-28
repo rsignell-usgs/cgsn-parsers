@@ -13,7 +13,7 @@ import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
+from common import ParserCommon
 from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, INTEGER, FLOAT, NEWLINE
 
 # Regex pattern for a line with a DCL time stamp, possible DCL status value and
@@ -42,39 +42,37 @@ PATTERN = (
 REGEX = re.compile(PATTERN, re.DOTALL)
 
 
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the wavss (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
-        'dcl_date_time_string',
-        'date_string',
-        'time_string',
-        'serial_number',
-        'num_zero_crossings',
-        'average_wave_height',
-        'mean_spectral_period',
-        'maximum_wave_height',
-        'significant_wave_height',
-        'significant_wave_period',
-        'average_tenth_height',
-        'average_tenth_period',
-        'average_wave_period',
-        'peak_period',
-        'peak_period_read',
-        'spectral_wave_height',
-        'mean_wave_direction',
-        'mean_directional_spread'
-    ])
+_parameter_names_wavss = [
+    'dcl_date_time_string',
+    'date_string',
+    'time_string',
+    'serial_number',
+    'num_zero_crossings',
+    'average_wave_height',
+    'mean_spectral_period',
+    'maximum_wave_height',
+    'significant_wave_height',
+    'significant_wave_period',
+    'average_tenth_height',
+    'average_tenth_period',
+    'average_wave_period',
+    'peak_period',
+    'peak_period_read',
+    'spectral_wave_height',
+    'mean_wave_direction',
+    'mean_directional_spread'
+]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the wavss specific
     methods to parse the data, and extracts the wavss data records from the DCL
     daily log files.
     """
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_wavss)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression

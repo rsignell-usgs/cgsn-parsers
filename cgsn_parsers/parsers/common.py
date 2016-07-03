@@ -1,13 +1,14 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.common
-@file parsers/common.py
+@package cgsn_parsers.parsers.common
+@file cgsn_parsers/parsers/common.py
 @author Christopher Wingard
 @brief Provides common base classes, definitions and other utlities for all
     the parsers.
 '''
 __author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
+__license__ = 'MIT'
 
 import argparse
 import datetime
@@ -52,9 +53,10 @@ class ParserCommon(object):
     A Parser class that begins the process of extracting data records from the
     DCL log files.
 
-    Two methods are provided to read the data files in as buffered objects 
-    using either readlines (if the file is ascii), or read if the file is a
-    pure binary file.
+    An initialize method is used to initialize the Parser object, with two 
+    methods provided to read the data files in as buffered objects (using 
+    either readlines, if the file is ascii, or read if the file is a
+    pure binary file).
     """
     def initialize(self, infile, parameters):
         # set the infile name and path
@@ -110,12 +112,12 @@ def inputs():
     '''
     # initialize arguement parser
     parser = argparse.ArgumentParser(description='''Parse data files from DCL
-                                     formatted daily data files''',
+                                     formatted daily or hourly log files''',
                                      epilog='''Parses the data file''')
 
-    # assign arguements for the infile and outfile and a switch that can be
-    # used, if needed, to set different options (e.g. if switch == 1, do this
-    # or that).
+    # assign arguements for the infile and outfile and a generi switch that can
+    # be used, if needed, to set different options (e.g. if switch == 1, do 
+    # this or that).
     parser.add_argument("-i", "--infile", dest="infile", type=str, required=True)
     parser.add_argument("-o", "--outfile", dest="outfile", type=str, required=True)
     parser.add_argument("-s", "--switch", dest="switch", type=int, default=0)

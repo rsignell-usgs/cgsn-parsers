@@ -1,9 +1,10 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_ctdbp
-@file parsers/parse_ctdbp.py
-@author Christopher Wingard
-@brief Parses ctdbp data logged by the custom built WHOI data loggers.
+@package cgsn_parsers.parsers.parse_ctdbp
+@file cgsn_parsers/parsers/parse_ctdbp.py
+@author Christopher Wingard 
+@brief Parses the 3 variants of CTDBP data.
 '''
 __author__ = 'Christopher Wingard'
 __license__ = 'Apache 2.0'
@@ -111,17 +112,17 @@ class Parser(ParserCommon):
         self.data.pressure.append(float(match.group(4)))
 
         if self.ctd_type == 1:
-            self.data.ctd_date_time_string.append(match.group(5))
+            self.data.ctd_date_time_string.append(str(match.group(5)))
 
         if self.ctd_type == 2:
-            self.data.oxygen_concentration.append(match.group(5))
-            self.data.ctd_date_time_string.append(match.group(6))
+            self.data.oxygen_concentration.append(float(match.group(5)))
+            self.data.ctd_date_time_string.append(str(match.group(6)))
 
         if self.ctd_type == 3:
-            self.data.raw_backscatter.append(match.group(5))
-            self.data.raw_chlorophyll.append(match.group(6))
-            self.data.raw_cdom.append(match.group(7))
-            self.data.ctd_date_time_string.append(match.group(8))
+            self.data.raw_backscatter.append(int(match.group(5)))
+            self.data.raw_chlorophyll.append(int(match.group(6)))
+            self.data.raw_cdom.append(int(match.group(7)))
+            self.data.ctd_date_time_string.append(str(match.group(8)))
 
 
 if __name__ == '__main__':
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     ctd_type = args.switch
 
     # initialize the Parser object for CTDBP
-    ctdbp = ParserCommon(infile, ctd_type)
+    ctdbp = Parser(infile, ctd_type)
 
     # load the data into a buffered object and parse the data into a dictionary
     ctdbp.load_ascii()

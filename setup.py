@@ -6,7 +6,7 @@ def readme():
 
 setup(name='cgsn_parsers',
     version = '0.1.0',
-    description = 'Collection of parsers for working with most of the raw data from OOI Endurance, Global and Pioneer moorings',
+    description = 'Collection of parsers for converting raw data from the OOI Endurance and Pioneer moorings to different formats for further work.',
     long_description = readme(),
     classifiers = [
         'Development Status :: 3 - Alpha',
@@ -14,7 +14,7 @@ setup(name='cgsn_parsers',
         'Programming Language :: Python :: 2.7',
         'Topic :: Data Parsing :: Scientific :: OOI',
     ],
-    keywords = 'OOI Endurance Global Pioneer raw data parsing',
+    keywords = 'OOI Endurance Pioneer raw data parsing',
     url = 'http://github.com/ooi-integration/cgsn-parsers',
     author = 'Christopher Wingard',
     author_email = 'cwingard@coas.oregonstate.edu',

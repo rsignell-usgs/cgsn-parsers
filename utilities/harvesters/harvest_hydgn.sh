@@ -22,7 +22,7 @@ FILE=`/bin/basename $5`
 # Set the default directory paths
 RAW="/home/ooiuser/data/raw"
 PARSED="/home/ooiuser/data/parsed"
-BIN="/home/ooiuser/bin/cgsn-parsers/parsers"
+BIN="/home/ooiuser/bin/cgsn-parsers/cgsn_parsers/parsers"
 PYTHON="/opt/python2.7.11/bin/python"
 
 # Setup the input and output filenames as well as the absolute paths
@@ -31,5 +31,8 @@ OUT="$PARSED/$PLATFORM/$DEPLOY/$HYD/${FILE%.log}.mat"
 
 # Parse the file
 if [ -e $IN ]; then
-    $PYTHON $BIN/parse_hydrogen.py -i $IN -o $OUT
+    if [ ! -e $OUT ]; then
+        mkdir $OUT
+    fi
+    $PYTHON $BIN/parse_hydgn.py -i $IN -o $OUT
 fi

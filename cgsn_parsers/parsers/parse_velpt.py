@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_velpt
-@file parsers/parse_velpt.py
+@package cgsn_parsers.parsers.parse_velpt
+@file cgsn_parsers/parsers/parse_velpt.py
 @author Christopher Wingard
 @brief Parses VELPT binary data files logged external to the unit.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
@@ -20,10 +17,9 @@ from pytz import timezone
 from struct import unpack
 
 # Import common utilites and base classes
-from common import Parser, inputs
+from cgsn_parsers.parsers.common import ParserCommon, inputs
 
-# Regex pattern for a binary VELPT (ac-s) data packet;
-# the number of wavelengths must be determined before the regex is compiled.
+# Regex pattern for a binary VELPT data packet;
 VELOCITY_REGEX = b'(\xa5\x01)([\x00-\xff]{40})'     # velocity data packets
 VELOCITY_MATCHER = re.compile(VELOCITY_REGEX, re.DOTALL)
 HEADER_REGEX = b'(\xa5\x06)([\x00-\xff]{34})'       # header data packets
@@ -91,7 +87,7 @@ class ParameterNames(object):
         return bunch
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the VELPT specific
     methods to parse the data, and extracts the VELPT data records from the DCL

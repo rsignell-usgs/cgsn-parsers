@@ -1,17 +1,18 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_zplsc
-@file parsers/parse_zplsc.py
+@package cgsn_parsers.parsers.parse_zplsc
+@file cgsn_parsers/parsers/parse_zplsc.py
 @author Christopher Wingard
-@brief Parses zplsc data logged by the custom built WHOI data loggers.
+@brief Parses ZPLSC data logged by the custom built WHOI data loggers.
 '''
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, STRING, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, STRING, NEWLINE
 
 # Set regex string to just find the ZPLSC data.
 PATTERN = (
@@ -22,13 +23,7 @@ PATTERN = (
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the ZPLSC (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_zplsc = [
         'dcl_date_time_string',
         'transmission_date_string',
         'serial_number',
@@ -45,15 +40,18 @@ class ParameterNames(ParameterNames):
         'profiles_freq2',
         'profiles_freq3',
         'profiles_freq4'
-    ])
+    ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     '''
     A Parser subclass that calls the Parser base class, adds the ZPLSC specific
     methods to parse the data, and extracts the ZPLSC data records from the DCL
     daily log files.
     '''
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_zplsc)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression

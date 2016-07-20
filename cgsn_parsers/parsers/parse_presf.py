@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_presf
-@file parsers/parse_presf.py
+@package cgsn_parsers.parsers.parse_presf
+@file cgsn_parsers/parsers/parse_presf.py
 @author Christopher Wingard
-@brief Parses presf data logged by the custom built WHOI data loggers.
+@brief Parses PRESF data logged by the custom built WHOI data loggers.
 '''
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
 
 # Regex pattern for a line with a DCL time stamp and the PRESF tide data.
 presf_date = r'(\d{2}\s\w{3}\s\d{4}\s\d{2}:\d{2}:\d{2})'
@@ -25,27 +25,24 @@ PATTERN = (
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the PRESF (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_presf = [
         'dcl_date_time_string',
         'presf_date_time_string',
         'absolute_pressure',
         'pressure_temp',
         'seawater_temperature'
-    ])
+    ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the PRESF specific
     methods to parse the data, and extracts the PRESF data records from the DCL
     daily log files.
     """
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_presf)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression

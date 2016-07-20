@@ -4,14 +4,11 @@
 @package cgsn_parsers.parsers.common
 @file cgsn_parsers/parsers/common.py
 @author Christopher Wingard
-@brief Provides common base classes, definitions and other utlities for all
-    the parsers.
+@brief Provides common base classes, definitions and other utlities for all parsers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'MIT'
-
 import argparse
 import datetime
+import re
 
 from bunch import Bunch
 from calendar import timegm
@@ -49,16 +46,20 @@ class ParameterNames(object):
 
 
 class ParserCommon(object):
-    """
+    '''
     A Parser class that begins the process of extracting data records from the
     DCL log files.
 
-    An initialize method is used to initialize the Parser object, with two 
-    methods provided to read the data files in as buffered objects (using 
+    An initialize method is used to initialize the Parser object, with two
+    methods provided to read the data files in as buffered objects (using
     either readlines, if the file is ascii, or read if the file is a
     pure binary file).
-    """
+    '''
     def initialize(self, infile, parameters):
+        '''
+        Initialize the Parser object with the input file and path and the data
+        parameters
+        '''
         # set the infile name and path
         self.infile = infile
 
@@ -89,16 +90,20 @@ def dcl_to_epoch(time_string):
     Use the DCL formatted date and time string to calculate an epoch timestamp
     (seconds since 1970-01-01)
     '''
-    try:
-        dcl = datetime.datetime.strptime(time_string, '%Y/%m/%d %H:%M:%S.%f')
-        utc = dcl.replace(tzinfo=timezone('UTC'))
-        # calculate the epoch time as seconds since 1970-01-01 in UTC
-        epts = timegm(utc.timetuple()) + (utc.microsecond / 1e6)
+    # find and replace the incorrectly formatted cases where the seconds are
+    # incorrectly set to 60.000 (seconds must be between 00 and 59).
+    if re.match(r'(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:60.\d{3})', time_string):
+        time_string = re.sub('60.\d{3}', '00.000', time_string)
+        tplus = 60.0
+    else:
+        tplus = 0.0
 
-    except ValueError as err:
-        print err.message
-        epts = float('NaN')
+    # convert the date and time string into a datetime object
+    dcl = datetime.datetime.strptime(time_string, '%Y/%m/%d %H:%M:%S.%f')
+    utc = dcl.replace(tzinfo=timezone('UTC'))
 
+    # calculate the epoch time as seconds since 1970-01-01 in UTC
+    epts = timegm(utc.timetuple()) + (utc.microsecond / 1e6) + tplus
     return epts
 
 
@@ -116,7 +121,7 @@ def inputs():
                                      epilog='''Parses the data file''')
 
     # assign arguements for the infile and outfile and a generi switch that can
-    # be used, if needed, to set different options (e.g. if switch == 1, do 
+    # be used, if needed, to set different options (e.g. if switch == 1, do
     # this or that).
     parser.add_argument("-i", "--infile", dest="infile", type=str, required=True)
     parser.add_argument("-o", "--outfile", dest="outfile", type=str, required=True)

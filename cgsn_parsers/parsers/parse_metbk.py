@@ -1,27 +1,24 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_metbk
-@file parsers/parse_metbk.py
+@package cgsn_parsers.parsers.parse_metbk
+@file cgsn_parsers/parsers/parse_metbk.py
 @author Christopher Wingard
 @brief Parses metbk data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParserCommon
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
-
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
 
 # Regex pattern for a line with a DCL time stamp, possible DCL status value and
 # the 12 following met data values.
 PATTERN = (
     DCL_TIMESTAMP + r'\s+' +   # DCL Time-Stamp
-    r'(?:\[\w*:\w*\]:\s*)*' +  # DCL status string (usually not be present) 
+    r'(?:\[\w*:\w*\]:\s*)*' +  # DCL status string (usually not be present)
     FLOAT + r'\s+' +           # barometric pressure
     FLOAT + r'\s+' +           # relative humidity
     FLOAT + r'\s+' +           # air temperature
@@ -36,7 +33,6 @@ PATTERN = (
     FLOAT + NEWLINE            # dummy field for ASIMET battery voltage
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
-
 
 _parameter_names_metbk = [
     'dcl_date_time_string',

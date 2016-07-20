@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_vel3d
-@file parsers/parse_vel3d.py
+@package cgsn_parsers.parsers.parse_vel3d
+@file cgsn_parsers/parsers/parse_vel3d.py
 @author Christopher Wingard
 @brief Parses VEL3D binary data files logged external to the unit.
 '''
@@ -17,11 +17,9 @@ from pytz import timezone
 from struct import unpack
 
 # Import common utilites and base classes
-from common import Parser, inputs
+from cgsn_parsers.parsers.common import ParserCommon, inputs
 
-
-# Regex pattern for a binary VEL3D (ac-s) data packet;
-# the number of wavelengths must be determined before the regex is compiled.
+# Regex pattern for a binary VEL3D data packet;
 VELOCITY_REGEX = b'(\xa5\x10)([\x00-\xff]{22})'     # velocity data packets
 VELOCITY_MATCHER = re.compile(VELOCITY_REGEX, re.DOTALL)
 SYSTEM_REGEX = b'(\xa5\x11)([\x00-\xff]{26})'  # system data packets
@@ -95,7 +93,7 @@ class ParameterNames(object):
         return bunch
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the VEL3D specific
     methods to parse the data, and extracts the VEL3D data records from the DCL
@@ -117,16 +115,16 @@ class Parser(Parser):
         above) in the data object, and parse the data file into a pre-defined
         dictionary object created using the Bunch class.
         '''
-        # find all the velocity data packets
+        # find all the header data packets
         record_marker = [m.start() for m in HEADER_MATCHER.finditer(self.raw)]
 
-        # if we have velocity records, then parse them one-by-one
+        # if we have header records, then parse them one-by-one
         while record_marker:
-            # set the start and stop points of the velocity packet
+            # set the start and stop points of the header packet
             start = record_marker[0]
             stop = start + 42
 
-            # parse the velocity packet
+            # parse the header packet
             self._build_parsed_header(self.raw[start:stop])
 
             # advance to the next record
@@ -138,7 +136,7 @@ class Parser(Parser):
         above) in the data object, and parse the data file into a pre-defined
         dictionary object created using the Bunch class.
         '''
-        # find all the system data header packets
+        # find all the velocity and system data packets
         system_marker = [m.start() for m in SYSTEM_MATCHER.finditer(self.raw)]
         velocity_marker = [m.start() for m in VELOCITY_MATCHER.finditer(self.raw)]
 

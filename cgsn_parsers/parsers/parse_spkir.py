@@ -1,9 +1,10 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_spkir
-@file parsers/parse_spkir.py
+@package cgsn_parsers.parsers.parse_spkir
+@file cgsn_parsers/parsers/parse_spkir.py
 @author Christopher Wingard
-@brief Parses spkir data logged by the custom built WHOI data loggers.
+@brief Parses SPKIR data logged by the custom built WHOI data loggers.
 '''
 import os
 import re
@@ -12,8 +13,8 @@ import scipy.io as sio
 from struct import Struct
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
 
 # Regex pattern for a line with a DCL time stamp and the OCR-507 data sample
 PATTERN = (
@@ -28,13 +29,7 @@ REGEX = re.compile(PATTERN, re.DOTALL)
 # Set the format for the binary packet for later unpacking
 SPKIR = Struct('<h7I3HBB')
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the SPKIR (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_spkir = [
         'date_time_string',
         'serial_number',
         'timer',
@@ -44,15 +39,18 @@ class ParameterNames(ParameterNames):
         'analog_rail_voltage',
         'frame_counter',
         'internal_temperature'
-    ])
+    ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     '''
     A Parser subclass that calls the Parser base class, adds the SPKIR specific
     methods to parse the data, and extracts the SPKIR data records from the DCL
     daily log files.
     '''
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_spkir)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression

@@ -1,25 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_phsen
-@file parsers/parse_phsen.py
+@package cgsn_parsers.parsers.parse_phsen
+@file cgsn_parsers/parsers/parse_phsen.py
 @author Christopher Wingard
 @brief Parses PHSEN data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP
 
-# Regex pattern for a line with a DCL time stamp, the "*" character, 4 unknown 
-# characters (2 for a 1 byte hash of the unit serial number and calibration, 
-# and 2 for the length byte), and a '0A' (indicating a Type 10, or pH, data 
+# Regex pattern for a line with a DCL time stamp, the "*" character, 4 unknown
+# characters (2 for a 1 byte hash of the unit serial number and calibration,
+# and 2 for the length byte), and a '0A' (indicating a Type 10, or pH, data
 # record), all of which combine to denote the start of a sampling record.
 PATTERN_START = (
     DCL_TIMESTAMP + r'\s+' +                # DCL Time-Stamp
@@ -27,13 +24,7 @@ PATTERN_START = (
 )
 REGEX_START = re.compile(PATTERN_START, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the PHSEN (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_phsen = [
         'dcl_date_time_string',
         'record_length',
         'record_type',
@@ -43,15 +34,18 @@ class ParameterNames(ParameterNames):
         'light_measurements',
         'voltage_battery',
         'thermistor_end'
-    ])
+    ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the PHSEN specific
     methods to parse the data, and extracts the PHSEN data records from the DCL
     daily log files.
     """
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_phsen)
+
     def parse_data(self):
         '''
         Iterate through the record markers (defined via the regex expression
@@ -121,7 +115,7 @@ class Parser(Parser):
             light.append(int(sample[indx:indx+4], 16))
 
         self.data.light_measurements.append(light)
-        
+
         cnt = indx + 8  # reset the counter for the final parameters
         self.data.voltage_battery.append(int(sample[cnt:cnt+4], 16))
         self.data.thermistor_end.append(int(sample[cnt+4:cnt+8], 16))

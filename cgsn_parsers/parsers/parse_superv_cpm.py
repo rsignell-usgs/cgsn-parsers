@@ -1,21 +1,18 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_metbk
-@file parsers/parse_metbk.py
+@package cgsn_parsers.parsers.parse_superv_cpm
+@file cgsn_parsers/parsers/parse_superv_cpm.py
 @author Christopher Wingard
-@brief Parses metbk data logged by the custom built WHOI data loggers.
+@brief Parses CPM supervisor data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, ParserCommon
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, NEWLINE
-
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, NEWLINE
 
 # Regex pattern for a line with a DCL time stamp
 PATTERN = (
@@ -42,14 +39,8 @@ PATTERN = (
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the METBK (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
-        'dcl_date_time_string',
+_parameter_names_superv = [
+        'cpm_date_time_string',
         'main_voltage',
         'main_current',
         'backup_battery_voltage',
@@ -88,7 +79,7 @@ class ParameterNames(ParameterNames):
         'wake_power_count',
         'esw_power_state',
         'dsl_power_state'
-    ])
+    ]
 
 
 class Parser(ParserCommon):
@@ -97,6 +88,9 @@ class Parser(ParserCommon):
     methods to parse the data, and extracts the METBK data records from the DCL
     daily log files.
     """
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_superv)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression
@@ -117,7 +111,7 @@ class Parser(ParserCommon):
         # 1970-01-01)
         epts = dcl_to_epoch(match.group(1))
         self.data.time.append(epts)
-        self.data.dcl_date_time_string.append(str(match.group(1)))
+        self.data.cpm_date_time_string.append(str(match.group(1)))
 
         # Assign the remaining MET data to the named parameters
         self.data.main_voltage.append(float(match.group(2)))
@@ -164,9 +158,6 @@ class Parser(ParserCommon):
         self.data.sbd_message_pending.append(float(match.group(33)))
 
         self.data.pps_source.append(float(match.group(34)))
-
-        #dcl_flags = int(match.group(35), 16)
-        #self.data.dcl_power_state.append([(dcl_flags >> i) & 1 for i in xrange(7)])
         self.data.dcl_power_state.append(int(match.group(35), 16))
 
         self.data.wake_time_count.append(float(match.group(36)))
@@ -184,7 +175,7 @@ if __name__ == '__main__':
     outfile = os.path.abspath(args.outfile)
 
     # initialize the Parser object for METBK
-    superv = ParserCommon(infile)
+    superv = Parser(infile)
 
     # load the data into a buffered object and parse the data into a dictionary
     superv.load_ascii()

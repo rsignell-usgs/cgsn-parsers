@@ -1,17 +1,18 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_fdchp
-@file parsers/parse_fdchp.py
+@package cgsn_parsers.parsers.parse_fdchp
+@file cgsn_parsers/parsers/parse_fdchp.py
 @author Christopher Wingard
-@brief Parses fdchp data logged by the custom built WHOI data loggers.
+@brief Parses FDCHP data logged by the custom built WHOI data loggers.
 '''
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP
 
 # Set regex string to just find the FDCHP data.
 PATTERN = (
@@ -21,13 +22,7 @@ PATTERN = (
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the FDCHP (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_fdchp = [
         'dcl_date_time_string',
         'start_time',
         'processing_version',
@@ -95,15 +90,18 @@ class ParameterNames(ParameterNames):
         'momentum_flux_vw',
         'buoyancy_flux',
         'wave_motion'
-        ])
+        ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     '''
     A Parser subclass that calls the Parser base class, adds the FDCHP specific
     methods to parse the data, and extracts the FDCHP data records from the DCL
     daily log files.
     '''
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_fdchp)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression
@@ -134,7 +132,7 @@ class Parser(Parser):
 
         # index through the list of parameter names and assign the data
         cnt = 0
-        for p in ParameterNames.parameters[2:]:
+        for p in _parameter_names_fdchp[1:]:
             if cnt == 2:
                 # the status parameter is a 6 character hex value ...
                 self.data[p].append(str(data[cnt]))

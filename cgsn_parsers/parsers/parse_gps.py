@@ -1,20 +1,18 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_gps
-@file parsers/parse_gps.py
+@package cgsn_parsers.parsers.parse_gps
+@file cgsn_parsers/parsers/parse_gps.py
 @author Christopher Wingard
 @brief Parses the GPS data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, STRING, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, STRING, NEWLINE
 
 # Regex pattern for the power system records
 PATTERN = (
@@ -26,13 +24,7 @@ PATTERN = (
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the PWRSYS (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_gps = [
         'dcl_date_time_string',
         'latitude',
         'longitude',
@@ -46,15 +38,18 @@ class ParameterNames(ParameterNames):
         'gps_time_string',
         'latitude_string',
         'longitude_string',
-    ])
+    ]
 
 
-class Parser(Parser):
-    """
-    A Parser subclass that calls the Parser base class, adds the PWRSYS specific
-    methods to parse the data, and extracts the PWRSYS data records from the DCL
+class Parser(ParserCommon):
+    '''
+    A Parser subclass that calls the Parser base class, adds the GPS specific
+    methods to parse the data, and extracts the GPS data records from the DCL
     daily log files.
-    """
+    '''
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_gps)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression
@@ -67,10 +62,10 @@ class Parser(Parser):
                 self._build_parsed_values(match)
 
     def _build_parsed_values(self, match):
-        """
+        '''
         Extract the data from the relevant regex groups and assign to elements
         of the data dictionary.
-        """
+        '''
         # Use the date_time_string to calculate an epoch timestamp (seconds since
         # 1970-01-01)
         epts = dcl_to_epoch(match.group(1))

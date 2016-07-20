@@ -1,20 +1,19 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_wavss
-@file parsers/parse_wavss.py
+@package cgsn_parsers.parsers.parse_wavss
+@file cgsn_parsers/parsers/parse_wavss.py
 @author Christopher Wingard
-@brief Parses WAVSS data logged by the custom built WHOI data loggers.
+@brief Parses the summary wave statistic WAVSS data logged by the custom built
+    WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParserCommon
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, INTEGER, FLOAT, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, INTEGER, FLOAT, NEWLINE
 
 # Regex pattern for a line with a DCL time stamp, possible DCL status value and
 # the wave statistics summary line
@@ -22,7 +21,7 @@ PATTERN = (
     DCL_TIMESTAMP + r'\s+' +       # DCL Time-Stamp
     r'\$TSPWA,(\d{8}),' +          # NMEA sentence header and date
     r'(\d{6}),' +                  # time
-    r'(\d{5}),buoyID,,,' +         # Tri-Axys unit serial number    
+    r'(\d{5}),buoyID,,,' +         # Tri-Axys unit serial number
     INTEGER + r',' +               # Number of Zero Crossings
     FLOAT + r',' +                 # Average wave height (Havg)
     FLOAT + r',' +                 # Tz (Mean Spectral  Period)
@@ -40,7 +39,6 @@ PATTERN = (
     r'\*[0-9a-fA-F]+' + NEWLINE    # checksum and <cr><lf>
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
-
 
 _parameter_names_wavss = [
     'dcl_date_time_string',

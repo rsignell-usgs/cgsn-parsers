@@ -1,46 +1,36 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_flort
-@file parsers/parse_flort.py
+@package cgsn_parsers.parsers.parse_flort
+@file cgsn_parsers/parsers/parse_flort.py
 @author Christopher Wingard
 @brief Parses flort data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, INTEGER, NEWLINE
-
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, INTEGER, NEWLINE
 
 # Regex pattern for a line with a DCL time stamp, possible DCL status value and
 # the 12 following met data values.
 PATTERN = (
-    DCL_TIMESTAMP + r'\s+' +                    # DCL Time-Stamp
-    r'([0-9/]+\s+[0-9:]+)' + r'\s+' +           # FLORT Date and Time 
-    INTEGER  + r'\s+' +                         # measurement_wavelength_beta
-    INTEGER  + r'\s+' +                         # raw_signal_beta
-    INTEGER  + r'\s+' +                         # measurement_wavelength_chl
-    INTEGER  + r'\s+' +                         # raw_signal_chl                         
-    INTEGER  + r'\s+' +                         # measurement_wavelength_cdom
-    INTEGER  + r'\s+' +                         # raw_signal_cdom
-    INTEGER  + r'\s+' +                         # raw_internal_temp
+    DCL_TIMESTAMP + r'\s+' +                   # DCL Time-Stamp
+    r'([0-9/]+\s+[0-9:]+)' + r'\s+' +          # FLORT Date and Time
+    INTEGER + r'\s+' +                         # measurement_wavelength_beta
+    INTEGER + r'\s+' +                         # raw_signal_beta
+    INTEGER + r'\s+' +                         # measurement_wavelength_chl
+    INTEGER + r'\s+' +                         # raw_signal_chl
+    INTEGER + r'\s+' +                         # measurement_wavelength_cdom
+    INTEGER + r'\s+' +                         # raw_signal_cdom
+    INTEGER + r'\s+' +                         # raw_internal_temp
     NEWLINE
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the flort (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_flort = [
         'dcl_date_time_string',
         'flort_date_time_string',
         'measurement_wavelength_beta',
@@ -50,15 +40,18 @@ class ParameterNames(ParameterNames):
         'measurement_wavelength_cdom',
         'raw_signal_cdom',
         'raw_internal_temp'
-    ])
+    ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the flort specific
     methods to parse the data, and extracts the flort data records from the DCL
     daily log files.
     """
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_flort)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression
@@ -71,10 +64,10 @@ class Parser(Parser):
                 self._build_parsed_values(match)
 
     def _build_parsed_values(self, match):
-        """
+        '''
         Extract the data from the relevant regex groups and assign to elements
         of the data dictionary.
-        """
+        '''
         # Use the date_time_string to calculate an epoch timestamp (seconds since
         # 1970-01-01)
         epts = dcl_to_epoch(match.group(1))

@@ -1,27 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_pco2a
-@file parsers/parse_pco2a.py
+@package cgsn_parsers.parsers.parse_pco2a
+@file cgsn_parsers/parsers/parse_pco2a.py
 @author Christopher Wingard
-@brief Parses pco2a data logged by the custom built WHOI data loggers.
+@brief Parses PCO2A data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, NEWLINE
 
 # Regex pattern for a line with a DCL time stamp, possible DCL status value and
 # the 12 following met data values.
 PATTERN = (
     DCL_TIMESTAMP + r'\s+' +                   # DCL Time-Stamp
-    r'#([0-9/]+\s[0-9:]+), M,\s*' +             # Pro-Oceanus Time Stamp
+    r'#([0-9/]+\s[0-9:]+), M,\s*' +            # Pro-Oceanus Time Stamp
     INTEGER + r',\s*' +                        # zero_a2d
     INTEGER + r',\s*' +                        # current_a2d
     FLOAT + r',\s*' +                          # measured_co2
@@ -36,16 +33,9 @@ PATTERN = (
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the PCO2A (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_pco2a = [
         'dcl_date_time_string',
         'co2_date_time_string',
-        'measurement_flag',
         'zero_a2d',
         'current_a2d',
         'measured_water_co2',
@@ -56,15 +46,18 @@ class ParameterNames(ParameterNames):
         'irga_detector_temperature',
         'irga_source_temperature',
         'co2_source'
-    ])
+    ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the PCO2A specific
     methods to parse the data, and extracts the PCO2A data records from the DCL
     daily log files.
     """
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_pco2a)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression
@@ -98,7 +91,7 @@ class Parser(Parser):
         self.data.gas_stream_pressure.append(int(match.group(9)))
         self.data.irga_detector_temperature.append(float(match.group(10)))
         self.data.irga_source_temperature.append(float(match.group(11)))
-        self.data.measurement_flag.append(str(match.group(12)))
+        self.data.co2_source.append(str(match.group(12)))
 
 if __name__ == '__main__':
     # load the input arguments

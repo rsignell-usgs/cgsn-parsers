@@ -1,20 +1,18 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_pwrsys
-@file parsers/parse_pwrsys.py
+@package cgsn_parsers.parsers.parse_pwrsys
+@file cgsn_parsers/parsers/parse_pwrsys.py
 @author Christopher Wingard
 @brief Parses the Power System data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, ParserCommon
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
 
 # Regex pattern for the power system records
 PATTERN = (
@@ -35,7 +33,7 @@ PATTERN = (
     r'bt4\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' +
     r'ext\s' + FLOAT + r'\s' + FLOAT + r'\s' +
     r'int\s' + FLOAT + r'\s' + FLOAT + r'\s' + FLOAT + r'\s' +
-    r'fcl\s' + FLOAT + r'\s' + 
+    r'fcl\s' + FLOAT + r'\s' +
     r'swg\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
     r'cvt\s([0-1]{1})\s' + FLOAT + r'\s' + FLOAT + r'\s' +
     r'([0-1]{1})\s' + FLOAT + r'\s([0-9a-f]{8})\s' +
@@ -44,13 +42,7 @@ PATTERN = (
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the PWRSYS (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_pwrsys = [
         'dcl_date_time_string',
         'main_voltage',
         'main_current',
@@ -109,7 +101,7 @@ class ParameterNames(ParameterNames):
         'cvt_interlock',
         'cvt_temperature',
         'error_flag3'
-    ])
+    ]
 
 
 class Parser(ParserCommon):
@@ -118,6 +110,9 @@ class Parser(ParserCommon):
     methods to parse the data, and extracts the PWRSYS data records from the DCL
     daily log files.
     """
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_pwrsys)
+
     def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression
@@ -207,7 +202,7 @@ if __name__ == '__main__':
     outfile = os.path.abspath(args.outfile)
 
     # initialize the Parser object for PWRSYS
-    pwrsys = ParserCommon(infile)
+    pwrsys = Parser(infile)
 
     # load the data into a buffered object and parse the data into a dictionary
     pwrsys.load_ascii()

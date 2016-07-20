@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_adcp
-@file parsers/parse_adcp.py
+@package cgsn_parsers.parsers.parse_adcp
+@file cgsn_parsers/parsers/parse_adcp.py
 @author Christopher Wingard
 @brief Parses Teledyne RDI WorkHorse ADCP data, reported as an ASCIIHEX string
     (in PD0 format) to the DCL with a DCL timestamp prepended to the record
@@ -13,9 +14,6 @@ Release notes:
     CyberInfrastructure team. See https://github.com/ooici/marine-integrations/blob/
     f9371e42341e1cb9363df84e8980ed063f0c0a95/mi/instrument/teledyne/particles.py
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
@@ -25,12 +23,13 @@ from bunch import Bunch
 from struct import unpack
 
 # Import common utilites and base classes
-from common import ParserCommon
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, NEWLINE
 
-# Regex set to find the start of a PD0 packet (DCL timestamp and the first 6 
-# bytes of the header data). Using the first 6 bytes of the packet is more 
-# explicit than just the 0x7f7f marker the manual specifies.
+# Regex set to find the start of a PD0 packet (DCL timestamp and the first 6
+# bytes of the header data). Using the first 6 bytes of the packet is a more
+# explicit regex than just the 0x7f7f marker the manual specifies, eliminating
+# false positive matches.
 PATTERN = (
     DCL_TIMESTAMP + r'\s+' +
     r'(7F7F)([0-9A-F]{4})(00)(06|07)' +
@@ -236,7 +235,7 @@ class ParameterNames(object):
 
 class Parser(ParserCommon):
     """
-    A Parser class that extracts the data records from a PD0 data packet 
+    A Parser class that extracts the data records from a PD0 data packet
     formatted in ASCIIHEX produced by a Teledyne RDI Workhorse ADCP.
     """
     def __init__(self, infile):
@@ -303,8 +302,6 @@ class Parser(ParserCommon):
                 chunk = ensemble[offset:offset+59]
                 self._parse_fixed_chunk(chunk)
                 iCells = self.num_depth_cells   # grab the # of depth cells
-                                                # obtained from the fixed leader
-                                                # data type
 
             # variable leader data (x80x00)
             if data_type == 128:
@@ -648,7 +645,7 @@ if __name__ == '__main__':
     outfile = os.path.abspath(args.outfile)
 
     # initialize the Parser object for PWRSYS
-    adcp = ParserCommon(infile)
+    adcp = Parser(infile)
 
     # load the data into a buffered object and parse the data into a dictionary
     adcp.load_ascii()

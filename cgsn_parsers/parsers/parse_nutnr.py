@@ -1,34 +1,33 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_nutnr
-@file parsers/parse_nutnr.py
+@package cgsn_parsers.parsers.parse_nutnr
+@file cgsn_parsers/parsers/parse_nutnr.py
 @author Christopher Wingard
-@brief Parses nutnr data logged by the custom built WHOI data loggers.
+@brief Parses NUTNR data logged by the custom built WHOI data loggers.
 '''
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, STRING, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, STRING, NEWLINE
 
 # Set regex string to just find the NUTNR data.
 PATTERN = (
     DCL_TIMESTAMP + r'\s+' +         # DCL Time-Stamp
     r'SATN(\w{2})' + r'(\d{4}),' +   # Measurement type and serial #
-    STRING + NEWLINE                 # rest of the data data, comma separated
+    STRING + NEWLINE                 # rest of the data, comma separated
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
 
-class ParameterNames(ParameterNames):
+def _get_parameter_names_nutnr(spectra):
     '''
-    Extend the parameter names with parameters for the NUTNR (time is already
-    declared in the base class).
+    Setup parameter names depending on the spectral output (full or condensed)
     '''
-    def __init__(self, spectra):
-        ParameterNames.parameters.extend([
+    parameter_names = [
             'date_time_string',
             'measurement_type',
             'serial_number',
@@ -39,42 +38,37 @@ class ParameterNames(ParameterNames):
             'auxiliary_fit_2nd',
             'auxiliary_fit_3rd',
             'rms_error'
+        ]
+
+    if spectra == 1:    # full spectra
+        parameter_names.extend([
+            'temperature_internal',
+            'temperature_spectrometer',
+            'temperature_lamp',
+            'lamp_on_time',
+            'humidity',
+            'voltage_lamp',
+            'voltage_analog',
+            'voltage_main',
+            'average_reference',
+            'variance_reference',
+            'seawater_dark',
+            'spectal_average',
+            'channel_measurements'
         ])
 
-        if spectra == 1:
-            ParameterNames.parameters.extend([
-                'temperature_internal',
-                'temperature_spectrometer',
-                'temperature_lamp',
-                'lamp_on_time',
-                'humidity',
-                'voltage_lamp',
-                'voltage_analog',
-                'voltage_main',
-                'average_reference',
-                'variance_reference',
-                'seawater_dark',
-                'spectal_average',
-                'channel_measurements'
-            ])
 
-
-class Parser(Parser):
+class Parser(ParserCommon):
     '''
     A Parser subclass that calls the Parser base class, adds the NUTNR specific
     methods to parse the data, and extracts the NUTNR data records from the DCL
     daily log files.
     '''
     def __init__(self, infile, spectra):
-        # set the infile name and path
-        self.infile = infile
+        self.initialize(infile, _get_parameter_names_nutnr(spectra))
         self.spectra = spectra
 
-        # initialize the data dictionary using the names defined above
-        data = ParameterNames(spectra)
-        self.data = data.create_dict()
-
-    def parse_data(self, spectra):
+    def parse_data(self):
         '''
         Iterate through the record lines (defined via the regex expression
         above) in the data object, and parse the data into a pre-defined
@@ -83,9 +77,9 @@ class Parser(Parser):
         for line in self.raw:
             match = REGEX.match(line)
             if match:
-                self._build_parsed_values(match, spectra)
+                self._build_parsed_values(match, self.spectra)
 
-    def _build_parsed_values(self, match, spectra):
+    def _build_parsed_values(self, match):
         '''
         Extract the data from the relevant regex groups and assign to elements
         of the data dictionary.
@@ -113,7 +107,7 @@ class Parser(Parser):
         self.data.rms_error.append(float(data[6]))
 
         # data found only in the full frames
-        if spectra == 1:
+        if self.spectra == 1:
             self.data.temperature_internal.append(float(data[7]))
             self.data.temperature_spectrometer.append(float(data[8]))
             self.data.temperature_lamp.append(float(data[9]))
@@ -140,7 +134,7 @@ if __name__ == '__main__':
 
     # load the data into a buffered object and parse the data into a dictionary
     nutnr.load_ascii()
-    nutnr.parse_data(spectra)
+    nutnr.parse_data()
 
     # write the resulting Bunch object via the toDict method to a matlab
     # formatted structured array.

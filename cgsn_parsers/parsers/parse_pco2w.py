@@ -1,25 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_pco2w
-@file parsers/parse_pco2w.py
+@package cgsn_parsers.parsers.parse_pco2w
+@file cgsn_parsers/parsers/parse_pco2w.py
 @author Christopher Wingard
-@brief Parses pco2w data logged by the custom built WHOI data loggers.
+@brief Parses PCO2W data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP
 
-# Regex pattern for a line with a DCL time stamp, the "*" character, 4 unknown 
-# characters (2 for a 1 byte hash of the unit serial number and calibration, 
-# and 2 for the length byte), and a '11' (indicating a Type 11, or Device 1, 
+# Regex pattern for a line with a DCL time stamp, the "*" character, 4 unknown
+# characters (2 for a 1 byte hash of the unit serial number and calibration,
+# and 2 for the length byte), and a '11' (indicating a Type 11, or Device 1,
 # data record), all of which combine to denote the start of a sampling record.
 PATTERN = (
     DCL_TIMESTAMP + r'\s+' +                  # DCL Time-Stamp
@@ -29,13 +26,7 @@ PATTERN = (
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the pco2w (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_pco2w = [
         'collect_date_time',
         'process_date_time',
         'unique_id',
@@ -45,15 +36,18 @@ class ParameterNames(ParameterNames):
         'light_measurements',
         'voltage_battery',
         'thermistor_raw'
-    ])
+    ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the pco2w specific
     methods to parse the data, and extracts the pco2w data records from the DCL
     daily log files.
     """
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_pco2w)
+
     def parse_data(self):
         '''
         Iterate through the record markers (defined via the regex expression
@@ -95,14 +89,14 @@ class Parser(Parser):
         Extract the data from the relevant regex groups and assign to elements
         of the data dictionary.
         """
-        # Use the date_time_string from the collection time to calculate an 
+        # Use the date_time_string from the collection time to calculate an
         # epoch timestamp (seconds since 1970-01-01), using that values as the
         # preferred time record for the data
         epts = dcl_to_epoch(collect_time)
         self.data.time.append(epts)
         self.data.collect_date_time.append(collect_time)
         self.data.process_date_time.append(process_time)
-        
+
         self.data.unique_id.append(int(sample[1:3], 16))
         self.data.record_length.append(int(sample[3:5], 16))
         self.data.record_type.append(int(sample[5:7], 16))
@@ -115,7 +109,7 @@ class Parser(Parser):
             light.append(int(sample[indx:indx+4], 16))
 
         self.data.light_measurements.append(light)
-        
+
         cnt = indx + 4  # reset the counter for the final parameters
         self.data.voltage_battery.append(int(sample[cnt:cnt+4], 16))
         self.data.thermistor_raw.append(int(sample[cnt+4:cnt+8], 16))

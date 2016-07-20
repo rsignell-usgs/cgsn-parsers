@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_mopak
-@file parsers/parse_mopak.py
+@package cgsn_parsers.parsers.parse_mopak
+@file cgsn_parsers/parsers/parse_mopak.py
 @author Christopher Wingard
-@brief Parses MOPAK  data logged by the custom built WHOI data loggers.
+@brief Parses MOPAK data logged by the custom built WHOI data loggers.
 '''
 import os
 import re
@@ -13,8 +13,8 @@ import scipy.io as sio
 from struct import Struct
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import logfilename_to_epoch, inputs, LOGFILENAME_TIMESTAMP
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import logfilename_to_epoch, inputs, LOGFILENAME_TIMESTAMP
 
 # Regex pattern for a binary MOPAK (Microstrain 3DM-GX3-25) data packet;
 PATTERN = b'(\xCB)([\x00-\xff]{42})'
@@ -23,13 +23,7 @@ REGEX = re.compile(PATTERN, re.DOTALL)
 # Struct class object for the MOPAK binary data byte streams
 MOPAK = Struct('>B9fIH')
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the mopak (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_mopak = [
         'acceleration_x',
         'acceleration_y',
         'acceleration_z',
@@ -40,15 +34,18 @@ class ParameterNames(ParameterNames):
         'magnetometer_y',
         'magnetometer_z',
         'timer'
-    ])
+    ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     '''
     A Parser subclass that calls the Parser base class, adds the mopak specific
     methods to parse the data, and extracts the mopak data records from the DCL
     daily log files.
     '''
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_mopak)
+
     def parse_data(self):
         '''
         Iterate through packets to parse the data into a pre-defined
@@ -80,7 +77,7 @@ class Parser(Parser):
 
             # parse the packet
             self._build_parsed_values(self.raw[start:stop], epts)
-            
+
             # grab the next packet
             record_marker.pop(0)
 

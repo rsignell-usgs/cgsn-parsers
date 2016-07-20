@@ -1,22 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-@package parsers.parse_optaa
-@file parsers/parse_optaa.py
+@package cgsn_parsers.parsers.parse_optaa
+@file cgsn_parsers/parsers/parse_optaa.py
 @author Russell Desiderio
 @brief Parses OPTAA data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Russell Desiderio'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 from struct import unpack
 
 # Import common utilites and base classes
-from common import ParameterNames, Parser
-from common import logfilename_to_epoch, inputs, LOGFILENAME_TIMESTAMP
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import logfilename_to_epoch, inputs, LOGFILENAME_TIMESTAMP
 
 # Regex pattern for a binary OPTAA (ac-s) data packet;
 # the number of wavelengths must be determined before the regex is compiled.
@@ -46,13 +43,7 @@ PATTERN = (
     '(.)'                       # 19 pad byte; always \x00
 )
 
-
-class ParameterNames(ParameterNames):
-    '''
-    Extend the parameter names with parameters for the optaa (time is already
-    declared in the base class).
-    '''
-    ParameterNames.parameters.extend([
+_parameter_names_optaa = [
         'serial_number',
         'a_reference_dark_counts',
         'pressure_counts',
@@ -67,17 +58,19 @@ class ParameterNames(ParameterNames):
         'aref_raw_counts',
         'csig_raw_counts',
         'asig_raw_counts'
-    ])
+    ]
 
 
-class Parser(Parser):
+class Parser(ParserCommon):
     """
     A Parser subclass that calls the Parser base class, adds the optaa specific
     methods to parse the data, and extracts the optaa data records from the DCL
     daily log files.
     """
-    def parse_data(self):
+    def __init__(self, infile):
+        self.initialize(infile, _parameter_names_optaa)
 
+    def parse_data(self):
         # parse the first data packet to find the packet length and number of
         # output wavelengths for this particular optaa (ac-s). the first good
         # data packet is delimited by marker bytes.

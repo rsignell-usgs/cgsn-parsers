@@ -3,19 +3,16 @@
 '''
 @package cgsn_parsers.parsers.parse_ctdbp
 @file cgsn_parsers/parsers/parse_ctdbp.py
-@author Christopher Wingard 
-@brief Parses the 3 variants of CTDBP data.
+@author Christopher Wingard
+@brief Parses the 3 variants of CTDBP data logged by the custom built WHOI data loggers.
 '''
-__author__ = 'Christopher Wingard'
-__license__ = 'Apache 2.0'
-
 import os
 import re
 import scipy.io as sio
 
 # Import common utilites and base classes
-from common import ParserCommon
-from common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, NEWLINE
+from cgsn_parsers.parsers.common import ParserCommon
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, INTEGER, NEWLINE
 
 # Set regex strings to just find the CTD data (with options for DOSTA or FLORT).
 DOSTA = FLOAT + r',\s+'

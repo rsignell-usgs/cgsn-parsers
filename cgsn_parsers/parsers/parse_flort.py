@@ -18,14 +18,14 @@ from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, INT
 # the 12 following met data values.
 PATTERN = (
     DCL_TIMESTAMP + r'\s+' +                   # DCL Time-Stamp
-    r'([0-9/]+\s+[0-9:]+)' + r'\s+' +          # FLORT Date and Time
+    r'([0-9/]+[0-9]+\s+[0-9:]+[0-9]+)' + r'\s+' +          # FLORT Date and Time
     INTEGER + r'\s+' +                         # measurement_wavelength_beta
     INTEGER + r'\s+' +                         # raw_signal_beta
     INTEGER + r'\s+' +                         # measurement_wavelength_chl
     INTEGER + r'\s+' +                         # raw_signal_chl
     INTEGER + r'\s+' +                         # measurement_wavelength_cdom
     INTEGER + r'\s+' +                         # raw_signal_cdom
-    INTEGER + r'\s+' +                         # raw_internal_temp
+    INTEGER + r'\s*' +                         # raw_internal_temp
     NEWLINE
 )
 REGEX = re.compile(PATTERN, re.DOTALL)

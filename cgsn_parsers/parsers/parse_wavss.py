@@ -4,8 +4,8 @@
 @package cgsn_parsers.parsers.parse_wavss
 @file cgsn_parsers/parsers/parse_wavss.py
 @author Christopher Wingard
-@brief Parses the summary wave statistic WAVSS data logged by the custom built
-    WHOI data loggers.
+@brief Parses the summary wave statistic data from the TriAxys Wave Sensor
+    logged by the custom built CGSN data loggers.
 '''
 import os
 import re
@@ -17,7 +17,7 @@ from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, INT
 
 # Regex pattern for a line with a DCL time stamp, possible DCL status value and
 # the wave statistics summary line
-PATTERN = (
+TSPWA_PATTERN = (
     DCL_TIMESTAMP + r'\s+' +       # DCL Time-Stamp
     r'\$TSPWA,(\d{8}),' +          # NMEA sentence header and date
     r'(\d{6}),' +                  # time
@@ -38,7 +38,97 @@ PATTERN = (
     FLOAT +                        # Mean Spread
     r'\*[0-9a-fA-F]+' + NEWLINE    # checksum and <cr><lf>
 )
-REGEX = re.compile(PATTERN, re.DOTALL)
+TSPWA_REGEX = re.compile(TSPWA_PATTERN, re.DOTALL)
+
+# Regex pattern for a line with a DCL time stamp, possible DCL status value and
+# the non-directional spectra array
+TSPNA_PATTERN = (
+    DCL_TIMESTAMP + r'\s+' +       # DCL Time-Stamp
+    r'\$TSPNA,(\d{8}),' +          # NMEA sentence header and date
+    r'(\d{6}),' +                  # time
+    r'(\d{5}),buoyID,,,' +         # Tri-Axys unit serial number
+    INTEGER + r',' +               # Number of Bands
+    FLOAT + r',' +                 # Initial frequency
+    FLOAT + r',' +                 # Frequency spacing
+    FLOAT +                        # Energy bands, 1 through N
+    r'\*[0-9a-fA-F]+' + NEWLINE    # checksum and <cr><lf>
+)
+TSPWA_REGEX = re.compile(TSPWA_PATTERN, re.DOTALL)
+
+# Regex pattern for a line with a DCL time stamp, possible DCL status value and
+# the wave statistics summary line
+TSPWA_PATTERN = (
+    DCL_TIMESTAMP + r'\s+' +       # DCL Time-Stamp
+    r'\$TSPWA,(\d{8}),' +          # NMEA sentence header and date
+    r'(\d{6}),' +                  # time
+    r'(\d{5}),buoyID,,,' +         # Tri-Axys unit serial number
+    INTEGER + r',' +               # Number of Zero Crossings
+    FLOAT + r',' +                 # Average wave height (Havg)
+    FLOAT + r',' +                 # Tz (Mean Spectral  Period)
+    FLOAT + r',' +                 # Hmax (Maximum Wave Height)
+    FLOAT + r',' +                 # Hsig (Significant Wave Height)
+    FLOAT + r',' +                 # Tsig (Significant Period)
+    FLOAT + r',' +                 # H10 (average height of highest 1/10 of waves)
+    FLOAT + r',' +                 # T10 (average period of H10 waves)
+    FLOAT + r',' +                 # Tavg (Mean Wave Period)
+    FLOAT + r',' +                 # TP (Peak Period)
+    FLOAT + r',' +                 # TP5
+    FLOAT + r',' +                 # HMO
+    FLOAT + r',' +                 # Mean Direction
+    FLOAT +                        # Mean Spread
+    r'\*[0-9a-fA-F]+' + NEWLINE    # checksum and <cr><lf>
+)
+TSPWA_REGEX = re.compile(TSPWA_PATTERN, re.DOTALL)
+
+# Regex pattern for a line with a DCL time stamp, possible DCL status value and
+# the wave statistics summary line
+TSPWA_PATTERN = (
+    DCL_TIMESTAMP + r'\s+' +       # DCL Time-Stamp
+    r'\$TSPWA,(\d{8}),' +          # NMEA sentence header and date
+    r'(\d{6}),' +                  # time
+    r'(\d{5}),buoyID,,,' +         # Tri-Axys unit serial number
+    INTEGER + r',' +               # Number of Zero Crossings
+    FLOAT + r',' +                 # Average wave height (Havg)
+    FLOAT + r',' +                 # Tz (Mean Spectral  Period)
+    FLOAT + r',' +                 # Hmax (Maximum Wave Height)
+    FLOAT + r',' +                 # Hsig (Significant Wave Height)
+    FLOAT + r',' +                 # Tsig (Significant Period)
+    FLOAT + r',' +                 # H10 (average height of highest 1/10 of waves)
+    FLOAT + r',' +                 # T10 (average period of H10 waves)
+    FLOAT + r',' +                 # Tavg (Mean Wave Period)
+    FLOAT + r',' +                 # TP (Peak Period)
+    FLOAT + r',' +                 # TP5
+    FLOAT + r',' +                 # HMO
+    FLOAT + r',' +                 # Mean Direction
+    FLOAT +                        # Mean Spread
+    r'\*[0-9a-fA-F]+' + NEWLINE    # checksum and <cr><lf>
+)
+TSPWA_REGEX = re.compile(TSPWA_PATTERN, re.DOTALL)
+
+# Regex pattern for a line with a DCL time stamp, possible DCL status value and
+# the wave statistics summary line
+TSPWA_PATTERN = (
+    DCL_TIMESTAMP + r'\s+' +       # DCL Time-Stamp
+    r'\$TSPWA,(\d{8}),' +          # NMEA sentence header and date
+    r'(\d{6}),' +                  # time
+    r'(\d{5}),buoyID,,,' +         # Tri-Axys unit serial number
+    INTEGER + r',' +               # Number of Zero Crossings
+    FLOAT + r',' +                 # Average wave height (Havg)
+    FLOAT + r',' +                 # Tz (Mean Spectral  Period)
+    FLOAT + r',' +                 # Hmax (Maximum Wave Height)
+    FLOAT + r',' +                 # Hsig (Significant Wave Height)
+    FLOAT + r',' +                 # Tsig (Significant Period)
+    FLOAT + r',' +                 # H10 (average height of highest 1/10 of waves)
+    FLOAT + r',' +                 # T10 (average period of H10 waves)
+    FLOAT + r',' +                 # Tavg (Mean Wave Period)
+    FLOAT + r',' +                 # TP (Peak Period)
+    FLOAT + r',' +                 # TP5
+    FLOAT + r',' +                 # HMO
+    FLOAT + r',' +                 # Mean Direction
+    FLOAT +                        # Mean Spread
+    r'\*[0-9a-fA-F]+' + NEWLINE    # checksum and <cr><lf>
+)
+TSPWA_REGEX = re.compile(TSPWA_PATTERN, re.DOTALL)
 
 _parameter_names_wavss = [
     'dcl_date_time_string',

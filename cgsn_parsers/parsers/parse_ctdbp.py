@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
     # load the data into a buffered object and parse the data into a dictionary
     ctdbp.load_ascii()
-    ctdbp.parse_data(ctd_type)
+    ctdbp.parse_data()
 
     # write the resulting Bunch object via the toDict method to a matlab
     # formatted structured array.

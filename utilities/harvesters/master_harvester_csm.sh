@@ -17,8 +17,7 @@ TIME="-$3 day"
 FNAME=`/bin/date -u +%Y%m%d --date="$TIME"`
 
 RAW="/home/ooiuser/data/raw"
-HARVEST="/home/ooiuser/bin/cgsn-parsers/harvester"
-PROCESS="/home/ooiuser/bin/cgsn-parsers/process"
+HARVEST="/home/ooiuser/bin/cgsn-parsers/utilities/harvesters"
 
 # Set some instrument names and processing flags based on the platform name
 case "$PLATFORM" in
@@ -36,7 +35,7 @@ case "$PLATFORM" in
         CTDBP2="ctdbp2"
         OPTAA1="optaa1"
         OPTAA2="optaa2"
-        PHSEN1="phsen"
+        PHSEN1="phsen1"
         PHSEN2="phsen2" ;;
     "ce09ossm" )
         MFN_FLAG=1
@@ -46,7 +45,7 @@ case "$PLATFORM" in
         CTDBP2="ctdbp2"
         OPTAA1="optaa1"
         OPTAA2="optaa2"
-        PHSEN1="phsen"
+        PHSEN1="phsen1"
         PHSEN2="phsen2" ;;
     * )
         echo "Unknown platform, please check the name again"
@@ -62,7 +61,14 @@ $HARVEST/harvest_superv_cpm.sh $PLATFORM $DEPLOY cpm1 0 $FNAME.superv.log
 $HARVEST/harvest_superv_dcl.sh $PLATFORM $DEPLOY dcl11 $FNAME.superv.log
 $HARVEST/harvest_hydrogen.sh $PLATFORM $DEPLOY dcl11 hyd1 $FNAME.hyd1.log
 $HARVEST/harvest_metbk.sh $PLATFORM $DEPLOY $FNAME.metbk.log
-$HARVEST/harvest_mopak.sh $PLATFORM $DEPLOY dcl11 $FNAME.mopak.log
+for mopak in $RAW/$PLATFORM/$DEPLOY/dcl11/mopak/$FNAME*.mopak.log; do
+    if [ -e $mopak ]; then
+        SIZE=`du -k "$mopak" | cut -f1`
+        if [ $SIZE > 0 ]; then
+            $HARVEST/harvest_mopak.sh $PLATFORM $DEPLOY dcl11 $mopak
+        fi
+    fi
+done
 $HARVEST/harvest_velpt.sh $PLATFORM $DEPLOY dcl11 velpt1 $FNAME.velpt1.log
 
 # DCL12
@@ -80,7 +86,6 @@ $HARVEST/harvest_superv_dcl.sh $PLATFORM $DEPLOY dcl26 $FNAME.superv.log
 $HARVEST/harvest_adcp.sh $PLATFORM $DEPLOY dcl26 $ADCP1 $FNAME.$ADCP1.log
 $HARVEST/harvest_nutnr.sh $PLATFORM $DEPLOY dcl26 0 $FNAME.nutnr.log
 $HARVEST/harvest_phsen.sh $PLATFORM $DEPLOY dcl26 $PHSEN1 $FNAME.$PHSEN1.log
-$PROCESS/process_l2_phsen.sh $PLATFORM $DEPLOY $PHSEN1 $FNAME.$PHSEN1.mat $CTDBP1
 $HARVEST/harvest_spkir.sh $PLATFORM $DEPLOY dcl26 $FNAME.spkir.log
 $HARVEST/harvest_velpt.sh $PLATFORM $DEPLOY dcl26 velpt2 $FNAME.velpt2.log
 
@@ -108,13 +113,12 @@ if [ $MFN_FLAG == 1 ]; then
     $HARVEST/harvest_adcp.sh $PLATFORM $DEPLOY dcl35 $ADCP2 $FNAME.$ADCP2.log
     $HARVEST/harvest_pco2w.sh $PLATFORM $DEPLOY dcl35 pco2w $FNAME.pco2w.log
     $HARVEST/harvest_phsen.sh $PLATFORM $DEPLOY dcl35 $PHSEN2 $FNAME.$PHSEN2.log
-    $PROCESS/process_l2_phsen.sh $PLATFORM $DEPLOY $PHSEN2 $FNAME.$PHSEN2.mat $CTDBP2
     $HARVEST/harvest_presf.sh $PLATFORM $DEPLOY $FNAME.presf.log
     for vel3d in $RAW/$PLATFORM/$DEPLOY/dcl35/vel3d/$FNAME*.vel3d.log; do
         if [ -e $vel3d ]; then
             SIZE=`du -k "$vel3d" | cut -f1`
             if [ $SIZE > 0 ]; then
-                $HARVEST/harvest_vel3d.sh $PLATFORM $DEPLOY $optaa
+                $HARVEST/harvest_vel3d.sh $PLATFORM $DEPLOY $vel3d
             fi
         fi
     done

@@ -8,7 +8,6 @@
 '''
 import os
 import re
-import scipy.io as sio
 from struct import unpack
 
 # Import common utilites and base classes
@@ -179,6 +178,7 @@ if __name__ == '__main__':
     optaa.load_binary()
     optaa.parse_data()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, optaa.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(optaa.data.toJSON())

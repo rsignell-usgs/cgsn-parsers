@@ -8,7 +8,6 @@
 '''
 import os
 import re
-import scipy.io as sio
 
 # Import common utilites and base classes
 from cgsn_parsers.parsers.common import ParserCommon
@@ -127,6 +126,7 @@ if __name__ == '__main__':
     pco2w.load_binary()     # not really binary, but this creates on object that is easy to parse
     pco2w.parse_data()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, pco2w.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(pco2w.data.toJSON())

@@ -8,7 +8,6 @@
 '''
 import os
 import re
-import scipy.io as sio
 
 # Import common utilites and base classes
 from cgsn_parsers.parsers.common import ParserCommon
@@ -100,6 +99,7 @@ if __name__ == '__main__':
     gps.load_ascii()
     gps.parse_data()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, gps.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(gps.data.toJSON())

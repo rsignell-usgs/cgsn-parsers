@@ -16,7 +16,6 @@ Release notes:
 '''
 import os
 import re
-import scipy.io as sio
 
 from binascii import unhexlify
 from bunch import Bunch
@@ -644,13 +643,14 @@ if __name__ == '__main__':
     infile = os.path.abspath(args.infile)
     outfile = os.path.abspath(args.outfile)
 
-    # initialize the Parser object for PWRSYS
+    # initialize the Parser object for the ADCP
     adcp = Parser(infile)
 
     # load the data into a buffered object and parse the data into a dictionary
     adcp.load_ascii()
     adcp.parse_data()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, adcp.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(adcp.data.toJSON())

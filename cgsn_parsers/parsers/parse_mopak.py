@@ -8,7 +8,6 @@
 '''
 import os
 import re
-import scipy.io as sio
 
 from struct import Struct
 
@@ -138,6 +137,7 @@ if __name__ == '__main__':
     mopak.load_binary()
     mopak.parse_data()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, mopak.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(mopak.data.toJSON())

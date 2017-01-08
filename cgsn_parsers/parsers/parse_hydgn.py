@@ -8,7 +8,6 @@
 '''
 import os
 import re
-import scipy.io as sio
 
 # Import common utilites and base classes
 from cgsn_parsers.parsers.common import ParserCommon
@@ -71,12 +70,13 @@ if __name__ == '__main__':
     outfile = os.path.abspath(args.outfile)
 
     # initialize the Parser object for hydrogen
-    hydrogen = Parser(infile)
+    hydgn = Parser(infile)
 
     # load the data into a buffered object and parse the data into a dictionary
-    hydrogen.load_ascii()
-    hydrogen.parse_data()
+    hydgn.load_ascii()
+    hydgn.parse_data()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, hydrogen.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(hydgn.data.toJSON())

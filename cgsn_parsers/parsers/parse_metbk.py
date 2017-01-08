@@ -8,29 +8,28 @@
 '''
 import os
 import re
-import scipy.io as sio
 
 # Import common utilites and base classes
 from cgsn_parsers.parsers.common import ParserCommon
-from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLOAT, NEWLINE
+from cgsn_parsers.parsers.common import dcl_to_epoch, inputs, DCL_TIMESTAMP, FLTNAN, NEWLINE
 
 # Regex pattern for a line with a DCL time stamp, possible DCL status value and
 # the 12 following met data values.
 PATTERN = (
     DCL_TIMESTAMP + r'\s+' +   # DCL Time-Stamp
     r'(?:\[\w*:\w*\]:\s*)*' +  # DCL status string (usually not be present)
-    FLOAT + r'\s+' +           # barometric pressure
-    FLOAT + r'\s+' +           # relative humidity
-    FLOAT + r'\s+' +           # air temperature
-    FLOAT + r'\s+' +           # longwave irradiance
-    FLOAT + r'\s+' +           # precipitation level
-    FLOAT + r'\s+' +           # sea surface temperature
-    FLOAT + r'\s+' +           # sea surface conductivity
-    FLOAT + r'\s+' +           # shortwave irradiance
-    FLOAT + r'\s+' +           # eastward wind velocity
-    FLOAT + r'\s+' +           # northward wind velocity
-    FLOAT + r'\s+' +           # repeated sea surface conductivity
-    FLOAT + NEWLINE            # dummy field for ASIMET battery voltage
+    FLTNAN + r'\s+' +           # barometric pressure
+    FLTNAN + r'\s+' +           # relative humidity
+    FLTNAN + r'\s+' +           # air temperature
+    FLTNAN + r'\s+' +           # longwave irradiance
+    FLTNAN + r'\s+' +           # precipitation level
+    FLTNAN + r'\s+' +           # sea surface temperature
+    FLTNAN + r'\s+' +           # sea surface conductivity
+    FLTNAN + r'\s+' +           # shortwave irradiance
+    FLTNAN + r'\s+' +           # eastward wind velocity
+    FLTNAN + r'\s+' +           # northward wind velocity
+    FLTNAN + r'\s+' +           # repeated sea surface conductivity
+    FLTNAN + NEWLINE            # dummy field for ASIMET battery voltage
 )
 REGEX = re.compile(PATTERN, re.DOTALL)
 
@@ -65,8 +64,12 @@ class Parser(ParserCommon):
         dictionary object created using the Bunch class.
         '''
         for line in self.raw:
+            # Some missing sensor data is represented as either a 'NaN', 'Na', 
+            # or 'N'. While 'NaN' is fine and can be used to represent missing
+            # data, 'Na' or 'N' needs to be set to a full 'NaN'.
+            line = re.sub(r'\sN[aN]*\s', '\sNaN\s', line)
             match = REGEX.match(line)
-            if match:
+            if match:                
                 self._build_parsed_values(match)
 
     def _build_parsed_values(self, match):
@@ -106,6 +109,7 @@ if __name__ == '__main__':
     metbk.load_ascii()
     metbk.parse_data()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, metbk.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(metbk.data.toJSON())

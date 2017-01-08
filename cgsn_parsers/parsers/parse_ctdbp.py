@@ -8,7 +8,6 @@
 '''
 import os
 import re
-import scipy.io as sio
 
 # Import common utilites and base classes
 from cgsn_parsers.parsers.common import ParserCommon
@@ -134,8 +133,9 @@ if __name__ == '__main__':
 
     # load the data into a buffered object and parse the data into a dictionary
     ctdbp.load_ascii()
-    ctdbp.parse_data(ctd_type)
+    ctdbp.parse_data()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, ctdbp.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(ctdbp.data.toJSON())

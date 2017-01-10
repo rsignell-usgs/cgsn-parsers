@@ -16,6 +16,7 @@ from pytz import timezone
 
 # Regex strings for use with the majority of parsers
 DCL_TIMESTAMP = r'(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})'
+LOGFILENAME_TIMESTAMP = (r'(\d{8}_\d{6})' + '\.' + '.+' + '\.' + 'log')
 FLOAT = r'([+-]?\d+.\d+[Ee]?[+-]?\d*)'  # includes scientific notation
 FLTNAN = r'([+-]?\d+.\d+[Ee]?[+-]?\d*|NaN)'
 INTEGER = r'([+-]?[0-9]+)'
@@ -105,6 +106,19 @@ def dcl_to_epoch(time_string):
 
     # calculate the epoch time as seconds since 1970-01-01 in UTC
     epts = timegm(utc.timetuple()) + (utc.microsecond / 1e6) + tplus
+    return epts
+
+
+def logfilename_to_epoch(time_string):
+    '''
+    Use the date and time string extracted from an hourly log filename to 
+    calculate an epoch timestamp (seconds since 1970-01-01)
+    '''
+    dt_filename = datetime.datetime.strptime(time_string, '%Y%m%d_%H%M%S')
+    utc = dt_filename.replace(tzinfo=timezone('UTC'))
+    # calculate the epoch time as seconds since 1970-01-01 in UTC
+    epts = timegm(utc.timetuple())
+
     return epts
 
 

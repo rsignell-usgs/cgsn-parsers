@@ -67,7 +67,7 @@ class Parser(ParserCommon):
             # Some missing sensor data is represented as either a 'NaN', 'Na', 
             # or 'N'. While 'NaN' is fine and can be used to represent missing
             # data, 'Na' or 'N' needs to be set to a full 'NaN'.
-            line = re.sub(r'\sN[aN]*\s', '\sNaN\s', line)
+            line = re.sub(r'N[aN]*', 'NaN', line)
             match = REGEX.match(line)
             if match:                
                 self._build_parsed_values(match)

@@ -115,7 +115,7 @@ class Parser(ParserCommon):
         of the data dictionary.
         """
         # Assign the optaa data to the named parameters
-        self.data.serial_number.append(str(unpack('>I', '\x00' + packet[9:12])[0]))
+        self.data.serial_number.append(unpack('>I', '\x00' + packet[9:12])[0])
         self.data.a_reference_dark.append(unpack('>H', packet[12:14])[0])
         self.data.pressure_raw.append(unpack('>H', packet[14:16])[0])
         self.data.a_signal_dark.append(unpack('>H', packet[16:18])[0])

@@ -4,7 +4,7 @@
 @package cgsn_parsers.tests.test_parse_metbk
 @file cgsn_parsers/tests/test_parse_metbk.py
 @author Christopher Wingard
-@brief Unit tests for parsing the 3 different types of metbk data
+@brief Unit tests for parsing the METBK data
 """
 import numpy as np
 import unittest

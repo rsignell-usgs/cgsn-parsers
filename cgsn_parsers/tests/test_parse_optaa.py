@@ -35,7 +35,7 @@ class TestParsingUnit(unittest.TestCase):
         # the OPTAA on the NSIF for CE04OSSM-00003, and is copied from the 
         # output for the first 20 packets (drops first packet for some reason).
         # data is further limited to just the initial parameters and the first 
-        # 5 wavelengths . 
+        # 5 wavelengths. 
         self.expected = np.array([
             [0x000102, 0x921a, 0xc08d, 0x000028aa, 86, 1184, 1287, 939, 1252, 1332, 1445, 1087, 1439, 1492, 1618, 1257, 1639, 1667, 1803, 1440, 1854, 1845, 1996, 1640, 2086],
             [0x000102, 0x9219, 0xc08c, 0x000029a2, 86, 1186, 1284, 939, 1253, 1338, 1449, 1093, 1446, 1491, 1619, 1258, 1643, 1663, 1804, 1442, 1861, 1847, 1995, 1644, 2087],
@@ -62,18 +62,28 @@ class TestParsingUnit(unittest.TestCase):
 
     def test_parse_optaa(self):
         '''
-        Compare the data parsed from a data log file from a Type 1 CTD to a
-        copy/paste/reformat array specified above.
+        Compare a subset of the data parsed from OPTAA hourly data log file.
 
         TODO: Add test for the epoch time stamp
         '''
-        self.optaa_type1.load_ascii()
-        self.optaa_type1.parse_data()
-        parsed = self.optaa_type1.data.toDict()
+        self.optaa.load_binary()
+        self.optaa.parse_data()
+        parsed = self.optaa.data.toDict()
+        #c_reference_raw = np.array(parsed['c_reference_raw'])
+        #a_reference_raw = np.array(parsed['a_reference_raw'])
+        #c_signal_raw = np.array(parsed['c_signal_raw'])
+        #a_signal_raw = np.array(parsed['a_signal_raw'])
         
-        np.testing.assert_array_equal(parsed['temperature'][:18], self.type1_expected[:, 0])
-        np.testing.assert_array_equal(parsed['conductivity'][:18], self.type1_expected[:, 1])
-        np.testing.assert_array_equal(parsed['pressure'][:18], self.type1_expected[:, 2])
+        
+        np.testing.assert_array_equal(parsed['serial_number'][1:21], self.expected[:, 0])
+        np.testing.assert_array_equal(parsed['external_temp_raw'][1:21], self.expected[:, 1])
+        np.testing.assert_array_equal(parsed['internal_temp_raw'][1:21], self.expected[:, 2])
+        np.testing.assert_array_equal(parsed['elapsed_run_time'][1:21], self.expected[:, 3])
+        np.testing.assert_array_equal(parsed['num_wavelengths'][1:21], self.expected[:, 4])
+        #np.testing.assert_array_equal(c_reference_raw[1:21, :5], self.expected[:, 5::4])
+        #np.testing.assert_array_equal(a_reference_raw[1:21, :5], self.expected[:, 6::4])
+        #np.testing.assert_array_equal(c_signal_raw[1:21, :5], self.expected[:, 7::4])
+        #np.testing.assert_array_equal(a_signal_raw[1:21, :5], self.expected[:, 8::4])
 
 if __name__ == '__main__':       
     unittest.main()

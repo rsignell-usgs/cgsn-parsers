@@ -8,7 +8,6 @@
 '''
 import os
 import re
-import scipy.io as sio
 
 # Import common utilites and base classes
 from cgsn_parsers.parsers.common import ParserCommon
@@ -65,10 +64,10 @@ class Parser(ParserCommon):
         dictionary object created using the Bunch class.
         '''
         for line in self.raw:
-            # Some missing sensor data is represented as either a 'NaN' or 
-            # 'Na'. While 'NaN' is fine and can be used to represent missing
-            # data, 'Na' is incomplete and needs to be set to a full 'NaN'.
-            line = re.sub(r'Na[N]*', 'NaN', line)
+            # Some missing sensor data is represented as either a 'NaN', 'Na', 
+            # or 'N'. While 'NaN' is fine and can be used to represent missing
+            # data, 'Na' or 'N' needs to be set to a full 'NaN'.
+            line = re.sub(r'N[aN]*', 'NaN', line)
             match = REGEX.match(line)
             if match:                
                 self._build_parsed_values(match)
@@ -110,6 +109,7 @@ if __name__ == '__main__':
     metbk.load_ascii()
     metbk.parse_data()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, metbk.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(metbk.data.toJSON())

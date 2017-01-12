@@ -4,8 +4,8 @@
 @package cgsn_parsers.parsers.parse_wavss
 @file cgsn_parsers/parsers/parse_wavss.py
 @author Christopher Wingard
-@brief Parses the summary wave statistic WAVSS data logged by the custom built
-    WHOI data loggers.
+@brief Parses the summary wave statistic data from the TriAxys Wave Sensor
+    logged by the custom built CGSN data loggers.
 '''
 import os
 import re

@@ -56,7 +56,7 @@ The following additional python packages are used by this code:
    * numpy >= 1.9.2
    * scipy >= 0.15.1
    * matplotlib >= 1.4.3
-   * bunch >= 1.0.1 (installed via pip)
+   * munch >= 2.0.4 
    * argparse >= 1.3.0
 
 # Contributing

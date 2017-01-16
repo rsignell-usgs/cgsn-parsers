@@ -10,7 +10,7 @@ import argparse
 import datetime
 import re
 
-from bunch import Bunch
+from munch import Munch
 from calendar import timegm
 from pytz import timezone
 
@@ -39,7 +39,7 @@ class ParameterNames(object):
         Create a Bunch class object to store the parameter names for the data
         files.
         '''
-        bunch = Bunch()
+        bunch = Munch()
 
         for name in self.parameters:
             bunch[name] = []

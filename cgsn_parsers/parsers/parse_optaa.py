@@ -11,8 +11,7 @@ import re
 from struct import unpack
 
 # Import common utilites and base classes
-from cgsn_parsers.parsers.common import ParserCommon
-from cgsn_parsers.parsers.common import logfilename_to_epoch, inputs, LOGFILENAME_TIMESTAMP
+from cgsn_parsers.parsers.common import ParserCommon, logfilename_to_epoch, inputs, LOGFILENAME_TIMESTAMP
 
 # Regex pattern for the start of a binary OPTAA (ac-s) data packet
 PATTERN = b'(\xff\x00\xff\x00)'

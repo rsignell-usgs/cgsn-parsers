@@ -10,7 +10,7 @@ import argparse
 import datetime
 import re
 
-from bunch import Bunch
+from munch import Munch as Bunch
 from calendar import timegm
 from pytz import timezone
 

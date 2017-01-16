@@ -10,7 +10,7 @@ import os
 import re
 import scipy.io as sio
 
-from bunch import Bunch
+from munch import Munch as Bunch
 from calendar import timegm
 from datetime import datetime
 from pytz import timezone

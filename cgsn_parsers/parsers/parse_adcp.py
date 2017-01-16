@@ -18,7 +18,7 @@ import os
 import re
 
 from binascii import unhexlify
-from bunch import Bunch
+from munch import Munch as Bunch
 from struct import unpack
 
 # Import common utilites and base classes

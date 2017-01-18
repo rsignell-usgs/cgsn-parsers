@@ -3,7 +3,7 @@
 '''
 @package cgsn_parsers.process.proc_optaa
 @file cgsn_parsers/process/proc_optaa
-@author Christopher Wingard with inspiration and guidance from Russell Desiderio
+@author Initially by Russell Desiderio with rewriting by Christopher Wingard
 @brief Reads in the parsed OPTAA data and applies the calibration, temperature,
     salinity and scattering corrections to the data, saving the resulting data  
 '''
@@ -14,7 +14,8 @@ import pandas as pd
 import re
 import requests
 import scipy.interpolate as sci
-import scipy.io as sio
+
+from munch import Munch
 
 from cgsn_parsers.process.common import Coefficients, inputs
 from ion_functions.data.opt_functions import opt_internal_temp, opt_external_temp
@@ -141,8 +142,8 @@ class Calibrations(Coefficients):
         for line in tca.content.splitlines():
             ta_array.append(np.array(line.split(',')).astype(np.float))
 
-        coeffs['tc_array'] = tc_array
-        coeffs['ta_array'] = ta_array
+        coeffs['tc_array'] = np.array(tc_array)
+        coeffs['ta_array'] = np.array(ta_array)
         
         # save the resulting dictionary
         self.coeffs = coeffs
@@ -154,31 +155,48 @@ def apply_dev(optaa, coeffs):
     convert the data into initial science units.
     '''
     # convert internal and external temperature sensors
-    optaa['internal_temp'] = opt_internal_temp(optaa['internal_temp_raw'])
-    optaa['external_temp'] = opt_external_temp(optaa['external_temp_raw'])
+    temp = opt_internal_temp(np.array(optaa.internal_temp_raw))
+    optaa.internal_temp = temp.tolist()
+    optaa.external_temp = (opt_external_temp(np.array(optaa.external_temp_raw))).tolist()
 
     # pressure
     if np.all(coeffs['pressure_coeff']==0):
         # do not use None, which will cause sio.savemat to croak.
-        optaa['pressure'] = np.NaN * optaa['pressure_raw']
+        optaa.pressure = (np.NaN * np.array(optaa.pressure_raw)).tolist()
     else:
         offset = coeffs['pressure_coeff'][0]
         slope = coeffs['pressure_coeff'][1]
-        optaa['pressure'] = opt_pressure(optaa['pressure_raw'], offset, slope)
+        optaa.pressure = (opt_pressure(np.array(optaa.pressure_raw), offset, slope)).tolist()
     
     # calculate the L1 OPTAA data products (uncorrected beam attenuation and 
     # absorbance) for particulates and dissolved organic matter with clear
     # water removed.
-    optaa['a_pd'] = opt_pd_calc(optaa['a_reference_raw'], optaa['a_signal_raw'],
-        coeffs['a_offsets'], optaa['internal_temp'], coeffs['temp_bins'],
-        coeffs['ta_array'])
-    optaa['c_pd'] = opt_pd_calc(optaa['c_reference_raw'], optaa['c_signal_raw'],
-        coeffs['c_offsets'], optaa['internal_temp'], coeffs['temp_bins'],
-        coeffs['tc_array'])
-
-    # add the beam attenuation and absorbance wavelengths to the data.
-    optaa['c_wavelengths'] = coeffs['c_wavelengths']
-    optaa['a_wavelengths'] = coeffs['a_wavelengths']
+    a_ref = np.array(optaa.a_reference_raw)
+    a_sig = np.array(optaa.a_signal_raw)
+    c_ref = np.array(optaa.c_reference_raw)
+    c_sig = np.array(optaa.c_signal_raw)
+    
+    # size up inputs
+    npackets = a_ref.shape[0]
+    nwavelengths = a_ref.shape[1]
+    # initialize the output arrays
+    apd = np.zeros([npackets, nwavelengths])
+    cpd = np.zeros([npackets, nwavelengths])
+    
+    for ii in range(npackets):
+        # calculate the uncorrected optical absorption coefficient [m^-1]
+        apd[ii, :], _ = opt_pd_calc(a_ref[ii, :], a_sig[ii, :], coeffs['a_offsets'], 
+            temp[ii], coeffs['temp_bins'], coeffs['ta_array'])
+        # calculate the uncorrected optical attenuation coefficient [m^-1]
+        cpd[ii, :], _ = opt_pd_calc(c_ref[ii, :], c_sig[ii, :], coeffs['c_offsets'], 
+            temp[ii], coeffs['temp_bins'], coeffs['tc_array'])
+    
+    # save the results back to the dictionary and add the beam attenuation and
+    # absorbance wavelengths to the data.
+    optaa.apd = apd.tolist()
+    optaa.cpd = cpd.tolist()
+    optaa.c_wavelengths = coeffs['c_wavelengths'].tolist()
+    optaa.a_wavelengths = coeffs['a_wavelengths'].tolist()
 
     # return the optaa dictionary with the factory calibrations applied
     return optaa
@@ -201,28 +219,47 @@ def apply_tscorr(optaa, coeffs, Temp=None, Salinity=None):
     '''
     # setup the temperature and salinity arrays
     if Temp is None:
-        Temp = optaa['external_temp'][:, np.newaxis]
+        Temp = np.array(optaa.external_temp)
     else: 
-        if np.array(Temp).size != 1:
-            Temp = Temp.flatten()[:, np.newaxis]
+        if np.array(Temp).size == 1:
+            Temp = np.ones(np.size(optaa.time)) * Temp
+        else:
+            Temp = np.array(Temp)
     
-    if Temp.size != optaa['time'].size:
+    if Temp.size != np.size(optaa.time):
         raise Exception("Mismatch: Temperature array != number of OPTAA measurements")
 
     if Salinity is None:
-        Salinity = 33.0
+        Salinity = np.ones(np.size(optaa.time)) * 33.0
     else:
-        if np.array(Salinity).size != 1:
-            Salinity = Salinity.flatten()[:, np.newaxis]
-    
-    if Salinity.size != optaa['time'].size:
+        if np.array(Salinity).size == 1:
+            Salinity = np.ones(np.size(optaa.time)) * Salinity
+        else:
+            Salinity = np.array(Salinity)
+
+    if Salinity.size != np.size(optaa.time):
         raise Exception("Mismatch: Salinity array != number of OPTAA measurements")
 
-    optaa['a_pd_ts'] = opt_tempsal_corr('a', optaa['a_pd'], optaa['a_wavelengths'], 
-        coeffs['temp_calibration'], Temp, Salinity)
-    optaa['c_pd_ts'] = opt_tempsal_corr('c', optaa['c_pd'], optaa['c_wavelengths'], 
-        coeffs['temp_calibration'], Temp, Salinity)
+    # setup and size the inputs
+    apd = np.array(optaa.apd)
+    cpd = np.array(optaa.cpd)
+    npackets = apd.shape[0]
+    nwavelengths = apd.shape[1]
+
+    # initialize the output arrays
+    apd_ts = np.zeros([npackets, nwavelengths])
+    cpd_ts = np.zeros([npackets, nwavelengths])
+
+    # apply the temperature and salinity corrections
+    for ii in range(npackets):
+        apd_ts[ii, :] = opt_tempsal_corr('a', apd[ii, :], coeffs['a_wavelengths'], 
+            coeffs['temp_calibration'], Temp[ii], Salinity[ii])
+        cpd_ts[ii, :] = opt_tempsal_corr('c', cpd[ii, :], coeffs['c_wavelengths'], 
+            coeffs['temp_calibration'], Temp[ii], Salinity[ii])
     
+    # save the results
+    optaa.apd_ts = apd_ts.tolist()
+    optaa.cpd_ts = cpd_ts.tolist()
     return optaa
 
 def apply_scatcorr(optaa, method=1):
@@ -235,39 +272,60 @@ def apply_scatcorr(optaa, method=1):
     if method != 1:
         raise Exception('Only scatter method = 1 is coded for the time being.')
 
-    a_interpolant = sci.interp1d(optaa['a_wavelengths'], optaa['a'])
+    a_interpolant = sci.interp1d(np.array(optaa.a_wavelengths), np.array(optaa.apd))
 
-    optaa['a_scatter_artifact'] = a_interpolant(reference_wavelength)
-    optaa['a_pd_ts_s'] = optaa['a'] - optaa['a_scatter_artifact'][:, np.newaxis]
+    scatter = a_interpolant(reference_wavelength)
+    apd_ts_s = np.array(optaa.apd_ts) - scatter[:, np.newaxis]
 
+    # save the results
+    optaa.apd_ts_s = apd_ts_s.tolist()
     return optaa
 
 if __name__ == '__main__':
-    # usage: l2_optaa.py -i INFILE -o OUTFILE -d DEVFILE
-    # load  the input arguments
+    # load the input arguments
     args = inputs()
     infile = os.path.abspath(args.infile)
     outfile = os.path.abspath(args.outfile)
-
-    devfile = os.path.abspath(args.devfile)
-
-    # load L1 data
-    optaa = sio.loadmat(infile, struct_as_record=False, squeeze_me=True)
-    optaa['datafile'] = infile
-
-    # read in the devfile info
-    dev = read_acs_devfile(args.devfile)
-
-    # compatibility checks
-    if dev['serial_number'] != optaa0['serial_number'][0].astype(int):
-        raise Exception('Serial Number mismatch between ac-s data and devfile.')
-    if dev['number_of_wavelengths'] != optaa0['number_of_wavelengths'][0]:
-        raise Exception('Number of wavelengths mismatch between ac-s data and devfile.')
-
-    optaa1 = apply_acs_devfile_to_rawdata(optaa0, dev)
-    optaa2 = apply_TS_corrections(optaa1, None, 33.0)
-    optaa = apply_scatter_correction(optaa2, 1)
-
-    # save the resulting data file
-    sio.savemat(outfile, optaa)
+    coeff_file = os.path.abspath(args.coeff_file)
     
+    dev = Calibrations(coeff_file)  # initialize calibration class
+    
+    # check for the source of calibration coeffs and load accordingly
+    if os.path.isfile(coeff_file):
+        # we always want to use this file if it exists
+        dev.load_coeffs()
+    elif args.devfile:
+        # load from the factory supplied device file
+        devfile = os.path.abspath(args.devfile)
+        dev.read_devfile(devfile)
+        dev.save_coeffs()
+    elif args.csvurl:
+        # load from the CI hosted CSV files
+        hdr_url = args.csvurl
+        tca_url = re.sub('.csv', '__CC_taarray.ext', hdr_url)
+        tcc_url = re.sub('.csv', '__CC_tcarray.ext', hdr_url)
+        dev.read_devurls(hdr_url, tca_url, tcc_url)
+        dev.save_coeffs()
+    else:
+        raise Exception('A source for the OPTAA calibration coefficients could not be found')
+    
+    # load the parsed, json data file
+    with open(infile, 'rb') as f:
+        optaa = Munch(json.load(f))
+
+    # check the device file coefficients against the data file contents
+    if dev.coeffs['serial_number'] != optaa.serial_number[0]:
+        raise Exception('Serial Number mismatch between ac-s data and the device file.')
+    if dev.coeffs['num_wavelengths'] != optaa.num_wavelengths[0]:
+        raise Exception('Number of wavelengths mismatch between ac-s data and the device file.')
+
+    # there is some monkey business imposed by having to go from json and list
+    # formatting to numpy arrays and back to lists. There may be better ways of
+    # doing this...
+    optaa = apply_dev(optaa, dev.coeffs)
+    optaa = apply_tscorr(optaa, dev.coeffs)
+    optaa = apply_scatcorr(optaa, 1)
+
+    # save the resulting data to a json formatted file
+    with open(outfile, 'wb') as f:
+        f.write(optaa.toJSON())

@@ -153,8 +153,6 @@ class Parser(ParserCommon):
         return checksum == unpack('>H', packet[-3:-1])[0]
 
 if __name__ == '__main__':
-    # usage: parse_optaa.py -i INFILE -o OUTFILE
-
     # load the input arguments
     args = inputs()
     infile = os.path.abspath(args.infile)

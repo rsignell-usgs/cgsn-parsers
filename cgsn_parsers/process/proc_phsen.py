@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     phsen.time_offset = offset
 
-    # set default calibration values (for now)
+    # set default calibration values (could later roll this into a coefficients file)
     nRec = len(phsen.thermistor_end)
     ea434 = np.ones(nRec) * 17533.
     eb434 = np.ones(nRec) * 2229.

@@ -8,8 +8,10 @@
 """
 import numpy as np
 import unittest
+
 from nose.plugins.attrib import attr
 from os import path
+
 from cgsn_parsers.parsers.parse_metbk import Parser
 
 # test data file created using chunks of data from various files with the
@@ -20,13 +22,19 @@ TESTDATA = path.join(path.dirname(__file__), 'metbk/metbk.test.dat')
 @attr('parse')
 class TestParsingUnit(unittest.TestCase):
     '''
+    OOI Endurance and Pioneer moorings use a custom built system from WHOI to
+    log data from a suite of meterological instruments with the data output
+    once a minute. The test data used below comes from a few different log
+    files, combined together to capture the diffent cases where missing data
+    is identified by either a NaN, Na or N.
     '''
     def setUp(self):
         '''
+        Load and parse the test METBK data and set the expected output array.
         '''
         # initialize Parser objects for the metbk types defined above.
         self.metbk = Parser(TESTDATA)
-        
+
         # set the expected output array minus the date/time strings
         self.expected = np.array([
             [1021.22, np.nan, np.nan, 298.2, 14.05, 9.444, 3.1416,   40.0, np.nan, np.nan],
@@ -38,14 +46,15 @@ class TestParsingUnit(unittest.TestCase):
             [1020.12, np.nan, np.nan, 343.5, 14.03, 9.115, 3.0978, np.nan,  -3.23,   4.32],
             [1020.94, np.nan, np.nan, 341.6, 14.01, 9.131, 3.0997, np.nan,  -5.14,   4.22],
             [1020.94, np.nan, np.nan, 338.6, 13.97, 9.132, 3.0997, np.nan,  -4.57,   4.06]])
-            
+
     def test_parse_metbk(self):
         '''
+        Test parsing of the METBK data
         '''
         self.metbk.load_ascii()
         self.metbk.parse_data()
         parsed = self.metbk.data.toDict()
-        
+
         np.testing.assert_array_equal(parsed['barometric_pressure'], self.expected[:, 0])
         np.testing.assert_array_equal(parsed['relative_humidity'], self.expected[:, 1])
         np.testing.assert_array_equal(parsed['air_temperature'], self.expected[:, 2])
@@ -57,6 +66,5 @@ class TestParsingUnit(unittest.TestCase):
         np.testing.assert_array_equal(parsed['eastward_wind_velocity'], self.expected[:, 8])
         np.testing.assert_array_equal(parsed['northward_wind_velocity'], self.expected[:, 9])
 
-
-if __name__ == '__main__':       
+if __name__ == '__main__':
     unittest.main()

@@ -8,8 +8,10 @@
 """
 import numpy as np
 import unittest
+
 from nose.plugins.attrib import attr
 from os import path
+
 from cgsn_parsers.parsers.parse_ctdbp import Parser
 
 
@@ -22,7 +24,7 @@ TESTDATA_CTDBP_TYPE3 = path.join(path.dirname(__file__), 'ctdbp/20161110.ctdbp3.
 class TestParsingUnit(unittest.TestCase):
     '''
     OOI Endurance and Pioneer moorings use the Sea-Bird Electronics 16Plus V2
-    CTDs, on the Buoy, NSIF and MFN instrument frames, configured in one of 3 
+    CTDs, on the Buoy, NSIF and MFN instrument frames, configured in one of 3
     ways. All units are set to report conductivity, temperature and pressure in
     engineering units.
 
@@ -38,11 +40,11 @@ class TestParsingUnit(unittest.TestCase):
     This is CTDBP Type 2.
 
     On the buoy instrument frame (approximately 1 m below the surface), for the
-    Endurance ISSM only, the CTD includes a WET Labs ECO Triplet (FLORT) 
-    fluorometer measuring chlorohyll and CDOM fluroescence and optical 
-    backscatter (values are reported in counts). The units are programmed to 
-    autonomously record a 10 s averaged measurement every 30 minutes in 
-    addition to being polled (via the TS command) every hour at the bottom of 
+    Endurance ISSM only, the CTD includes a WET Labs ECO Triplet (FLORT)
+    fluorometer measuring chlorohyll and CDOM fluroescence and optical
+    backscatter (values are reported in counts). The units are programmed to
+    autonomously record a 10 s averaged measurement every 30 minutes in
+    addition to being polled (via the TS command) every hour at the bottom of
     the hour. This is CTDBP Type 3.
 
     This test class will parse and compare the outputs from all three types of
@@ -57,10 +59,10 @@ class TestParsingUnit(unittest.TestCase):
         self.ctdbp_type1 = Parser(TESTDATA_CTDBP_TYPE1, 1)
         self.ctdbp_type2 = Parser(TESTDATA_CTDBP_TYPE2, 2)
         self.ctdbp_type3 = Parser(TESTDATA_CTDBP_TYPE3, 3)
-        
+
         # set the expected output arrays for the each of the CTDBP types using
-        # the raw data minus the date/time strings (data copied directly from 
-        # the raw files and reformatted into arrays). For CTDBP type 1 data, 
+        # the raw data minus the date/time strings (data copied directly from
+        # the raw files and reformatted into arrays). For CTDBP type 1 data,
         # just using the first burst of data.
         self.type1_expected = np.array([
             [9.6259, 3.13279, 7.185],
@@ -81,7 +83,7 @@ class TestParsingUnit(unittest.TestCase):
             [9.6240, 3.13117, 7.009],
             [9.6002, 3.12410, 6.832],
             [9.6075, 3.12734, 6.937]])
-            
+
         self.type2_expected = np.array([
             [10.1877,  3.66669,   88.598,  188.850],
             [10.1725,  3.66563,   88.409,  190.529],
@@ -135,25 +137,19 @@ class TestParsingUnit(unittest.TestCase):
 
     def test_parse_ctdbp_type1(self):
         '''
-        Compare the data parsed from a data log file from a Type 1 CTD to a
-        copy/paste/reformat array specified above.
-
-        TODO: Add test for the epoch time stamp
+        Test parsing of a Type 1 CTDBP (no DOSTA or FLORT)
         '''
         self.ctdbp_type1.load_ascii()
         self.ctdbp_type1.parse_data()
         parsed = self.ctdbp_type1.data.toDict()
-        
+
         np.testing.assert_array_equal(parsed['temperature'][:18], self.type1_expected[:, 0])
         np.testing.assert_array_equal(parsed['conductivity'][:18], self.type1_expected[:, 1])
         np.testing.assert_array_equal(parsed['pressure'][:18], self.type1_expected[:, 2])
 
     def test_parse_ctdbp_type2(self):
         '''
-        Compare the data parsed from a data log file from a Type 2 CTD to a
-        copy/paste/reformat array specified above.
-
-        TODO: Add test for the epoch time stamp
+        Test parsing of a Type 2 CTDBP (with DOSTA)
         '''
         self.ctdbp_type2.load_ascii()
         self.ctdbp_type2.parse_data()
@@ -166,10 +162,7 @@ class TestParsingUnit(unittest.TestCase):
 
     def test_parse_ctdbp_type3(self):
         '''
-        Compare the data parsed from a data log file from a Type 3 CTD to a
-        copy/paste/reformat array specified above.
-
-        TODO: Add test for the epoch time stamp
+        Test parsing of a Type 3 CTDBP (with FLORT)
         '''
         self.ctdbp_type3.load_ascii()
         self.ctdbp_type3.parse_data()
@@ -183,5 +176,5 @@ class TestParsingUnit(unittest.TestCase):
         np.testing.assert_array_equal(parsed['raw_cdom'], self.type3_expected[:, 5])
 
 
-if __name__ == '__main__':       
+if __name__ == '__main__':
     unittest.main()

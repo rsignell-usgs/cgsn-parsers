@@ -17,7 +17,7 @@ TIME="-$3 day"
 FNAME=`/bin/date -u +%Y%m%d --date="$TIME"`
 
 RAW="/home/ooiuser/data/raw"
-HARVEST="/home/ooiuser/bin/cgsn-parsers/utlities/harvesters"
+HARVEST="/home/ooiuser/bin/cgsn-parsers/utilities/harvesters"
 
 # CPM1
 $HARVEST/harvest_gps.sh $PLATFORM $DEPLOY $FNAME.gps.log

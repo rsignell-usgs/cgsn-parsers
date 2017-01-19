@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='cgsn_parsers',
-    version = '0.1.0',
+    version = '0.1.1',
     description = 'Collection of parsers for converting raw data from the OOI Endurance and Pioneer moorings to different formats for further work.',
     long_description = readme(),
     classifiers = [
@@ -24,8 +24,9 @@ setup(name='cgsn_parsers',
         'numpy >= 1.9.2',
         'scipy >= 0.15.1',
         'matplotlib >= 1.4.3',
-        'bunch >= 1.0.1',
+        'munch >= 2.1.0',
         'argparse >= 1.3.0',
+        'gsw >= 3.0.3'
     ],
     include_package_data = True,
     zip_safe = False)

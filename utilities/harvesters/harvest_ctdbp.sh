@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Read the raw CTDBP data files for the Endurance Coastal Surface Moorings and
-# create parsed datasets available in Matlab formatted .MAT files for further
-# processing and review.
+# Read the raw CTDBP data files for the Endurance Surface Moorings and create
+# parsed datasets available in JSON formatted files for further processing and
+# review.
 #
 # Wingard, C. 2015-04-17
 
@@ -22,16 +22,26 @@ SWITCH=$5
 FILE=`/bin/basename $6`
 
 # Set the default directory paths
-RAW="/home/ooiuser/data/raw"
-PARSED="/home/ooiuser/data/parsed"
-BIN="/home/ooiuser/bin/cgsn-parsers/parsers"
-PYTHON="/opt/python2.7.11/bin/python"
+RAW="/webdata/cgsn/data/raw"
+PARSED="/webdata/cgsn/data/proc"
+BIN="/home/cgsnmo/dev/cgsn-parsers/cgsn_parsers/parsers"
+PYTHON="/home/cgsnmo/anaconda3/envs/py27/bin/python"
 
 # Setup the input and output filenames as well as the absolute paths
-IN="$RAW/$PLATFORM/$DEPLOY/$DCL/$CTDBP/$FILE"
-OUT="$PARSED/$PLATFORM/$DEPLOY/$CTDBP/${FILE%.log}.mat"
+if [ $DCL = "dcl17" ]; then
+    pltfrm="buoy"
+elif [ $DCL = "dcl16" ] || [ $DCL = "dcl27" ]; then
+    pltfrm="nsif"
+else
+    pltfrm="mfn"
+fi
+IN="$RAW/$PLATFORM/$DEPLOY/cg_data/$DCL/$CTDBP/$FILE"
+OUT="$PARSED/$PLATFORM/$DEPLOY/$pltfrm/ctdbp/${FILE%.log}.json"
+if [ ! -d `/usr/bin/dirname $OUT` ]; then
+    mkdir -p `/usr/bin/dirname $OUT`
+fi
 
 # Parse the file
 if [ -e $IN ]; then
-    $PYTHON $BIN/parse_ctdbp.py -i $IN -o $OUT -s $SWITCH
+    $PYTHON -m $BIN/parse_ctdbp -i $IN -o $OUT -s $SWITCH
 fi

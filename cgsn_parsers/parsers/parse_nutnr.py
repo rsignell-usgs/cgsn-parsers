@@ -22,7 +22,7 @@ PATTERN = (
 REGEX = re.compile(PATTERN, re.DOTALL)
 
 
-def _get_parameter_names_nutnr(spectra):
+def _parameter_names_nutnr(spectra):
     '''
     Setup parameter names depending on the spectral output (full or condensed)
     '''
@@ -55,6 +55,8 @@ def _get_parameter_names_nutnr(spectra):
             'spectal_average',
             'channel_measurements'
         ])
+    
+    return parameter_names
 
 
 class Parser(ParserCommon):
@@ -64,7 +66,7 @@ class Parser(ParserCommon):
     daily log files.
     '''
     def __init__(self, infile, spectra):
-        self.initialize(infile, _get_parameter_names_nutnr(spectra))
+        self.initialize(infile, _parameter_names_nutnr(spectra))
         self.spectra = spectra
 
     def parse_data(self):
@@ -78,7 +80,7 @@ class Parser(ParserCommon):
             if match:
                 self._build_parsed_values(match, self.spectra)
 
-    def _build_parsed_values(self, match):
+    def _build_parsed_values(self, match, spectra):
         '''
         Extract the data from the relevant regex groups and assign to elements
         of the data dictionary.

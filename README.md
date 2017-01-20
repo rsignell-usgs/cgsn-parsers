@@ -43,14 +43,23 @@ data](https://rawdata.oceanobservatories.org/files/).
 
 # Directory Organization
 
-Shell scripts in the utilities/harvesters directory are presented as an example 
-of how to collect data from the different instrument systems installed on a 
+The python code for this project is available in the cgsn_parsers direcory.
+
+Examples for how to work with some of the parsers and processors are presented
+in the notebooks directory using [Jupyter](http://jupyter.org/) Notebooks.
+
+Shell scripts in the utilities/harvesters directory are presented as an example
+of how to collect data from the different instrument systems installed on a
 mooring, either individually or via a `master_harvester.sh` shell script. These
 scripts set the input and output directories for the data and call the
 appropriate python parser (located in the cgsn_parsers directory) to use with
 that instrument. It should be noted that these scripts were created with a
-specific user and system in mind. Users will need to adapt these scripts to
-fit their own needs.
+specific user and system in mind. Users will need to adapt these scripts to fit
+their own needs.
+
+Additional shell scripts in the utilities/processors directory are provided as
+examples of how to process the parsed data (e.g. converting values to scientific
+units, deriving new values, applying factory calibrations, etc). 
 
 Some sample plots, with the Matlab code for creating them, are available in the
 utilities/plotting directory as an example for how to work with the resulting
@@ -63,7 +72,7 @@ This code was written and tested against Python 2.7.12 using Anaconda from
 
 The following additional python packages are used by this code:
 
-   * gsw >= 3.0.3
+   * gsw >= 3.0.3 (if planning on supplementing ion-functions)
    * numpy >= 1.9.2
    * scipy >= 0.15.1
    * matplotlib >= 1.4.3
@@ -72,53 +81,104 @@ The following additional python packages are used by this code:
    
 Additionally, users will need to obtain a copy of
 [ion-functions](https://github.com/ooici/ion-functions) if they want to use the
-processors. This part can be somewhat gory. First, use of a few functions in
-ion-functions requires a Linux system with the
-[TEOS-10](http://www.teos-10.org/) C code compiled and installed per the
-instructions in
-[ion-functions](https://github.com/ooici/ion-functions/README.md).
+processors (can be ignored if just using the parsers). This part does require
+some effort and consideration. Some elements of the ion-functions code requires
+compiling C code on a Linux system and installing shared libraries. If those
+functions are not used (and they basically are not in this project), then the
+user simply needs to clone ion-functions to their local machine (OS
+independent), add the ion-functions directory to their PYTHONPATH, and proceed.
+If you do want the functions, on a Linux or Mac (example below tested on a
+CentOS 6 machine using Anaconda):
+
+First, use of a few functions in ion-functions requires the
+[TEOS-10](http://www.teos-10.org/) C code compiled and installed as a shared
+library.
+
+**On OSX**  
+
+The libgswteos dependency is brew installable:
+
+    brew tap lukecampbell/homebrew-libgswteos
+    brew install libgswteos-10
+    brew test -v libgswteos-10
+
+**On Linux**
+
+The dependencies for building/installing the library are: **autoconf**,
+**automake**, & **libtool**
+    
+1. Obtain the tarball from: https://github.com/lukecampbell/gsw-teos/tarball/v3.0r4
+    * sha1: 6ae190b7da78d6aff7859e7d1a3bb027ce6cc5f3
+
+1. Build Procedure
+
+        bash ./autogen.sh  
+        ./configure --prefix=/usr/local/libgswteos-10  
+        make  
+        sudo make install  
+
+1. Linking Procedure:
+
+        sudo ln -s /usr/local/libgswteos-10/lib/libgswteos-10.la /usr/local/lib/  
+        sudo ln -s /usr/local/libgswteos-10/lib/libgswteos-10.so.3 /usr/local/lib/  
+        sudo ln -s /usr/local/libgswteos-10/lib/libgswteos-10.so.3.0.0 /usr/local/lib/  
+        sudo ln -s /usr/local/libgswteos-10/lib/libgswteos-10.so /usr/local/lib/  
+        sudo ln -s /usr/local/libgswteos-10/include/gswteos-10.h /usr/local/include/  
+
+1. Ensure that the global `C_INCLUDE_PATH` and `LD_LIBRARY_PATH` includes
+/usr/local/lib and /usr/local/include in all profiles otherwise python won't
+run correctly:
+
+        echo | gcc -v -Wl,--verbose -x c -E -
+
+1. Check the output, /usr/local/include should be one of the defaults in the
+search path). If not (it should be), add the following to your
+.bash_profile:
+
+        export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/include     
+
+1. Check that /usr/local/lib is part of the LIBRARY_PATH. If it is:
+
+        ldconfig -v | grep -v ^$'\t'
+        
+If not (as root), 
+        
+        echo "/usr/local/lib" > /etc/ld.so.conf.d/usr_local.conf
+        ldconfig
 
 Depending on how the user operates python on their system (strongly recommend
 creating a virtual python environment via either
 [virtualenv](https://virtualenv.readthedocs.org/en/latest/) or [Continum
 Analytics Anaconda python](https://www.continuum.io/why-anaconda)), some
-alteration of the setup.py file in ion-functions will be required. The setup file
-assumes the use of virtualenv and pip for installation of python packages. I
-prefer to use Anaconda and use conda to install almost all of the required
-python modules. The section to edit is the "install_requires" list in the setup
-section. Simply delete all entries other than pygsw and geomag (making sure to
-install them via pip or conda) prior to running the setup. Recommended
-installation steps are:
+alteration of the setup.py file in ion-functions will be required.
+
+The section to edit is the "install_requires" list in the setup section. Simply
+delete all entries other than pygsw and geomag (making sure to install those
+packages via pip or conda if not already installed). Then, using either Anaconda
+or a Virtual Environment:
 
 ```
 # using Anaconda
 cd <ion-functions-dir>
 source activate <cgsn-virtualenv>
-conda install numpy scipy cython nose readlines numexpr
+conda install numpy scipy cython nose readline numexpr
 # be sure to edit setup.py to remove above packages from install_requires
-python setup.py build
-python setup.py develop
+pip install -e /<local_path>/ion-funtions
 ```
 ```
 # using Virtualenv
 cd <ion-functions-dir>
 activate <cgsn-virtualenv>
-pip install numpy>=1.9.2
-python setup.py build
-python setup.py develop
+pip install numpy scipy cython nose readline numexpr
+pip install -e /<local_path>/ion-funtions
 ```
 
-Note, using "develop" above for the setup will install the ion-functions
-package while providing a means to uninstall the package, re-build and
-re-install it when updates to the code are made.
-
-Alternatively, clone a read-only copy of
-[ion-functions](https://github.com/ooici/ion-functions) onto your computer, add
-the root directory (ion-functions) to your PYTHONPATH, and call the various
-python modules therein directly. I've worked with it this way on my PC and on Linux.
-Instead of using the TEOS-10 code outline in
+Alternatively, clone [ion-functions](https://github.com/ooici/ion-functions)
+onto your computer, add the root directory (ion-functions) to your PYTHONPATH,
+and call the various python modules therein directly. I've worked with it this
+way on my PC and on Linux. Instead of using the TEOS-10 code outlined in
 [ion-functions](https://github.com/ooici/ion-functions), I use the python
-package GSW.
+package GSW. The TEOS-10 functions are largely confined to the ctd_functions.
 
 # Contributing
 

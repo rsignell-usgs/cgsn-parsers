@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Read the DCL Supervisor log files for the Endurance Coastal Surface Moorings
-# and create parsed datasets available in Matlab formatted .MAT files for
-# further processing and review.
+# Read the DCL Supervisor log files for the Endurance Surface Moorings and
+# create parsed datasets available in JSON formatted files for further
+# processing and review.
 #
 # Wingard, C. 2015-04-17
 
@@ -10,7 +10,7 @@
 if [ $# -ne 4 ]; then
     echo "$0: required inputs are the platform and deployment names,"
     echo "the name of the DCL, and the name of the file to process."
-    echo "     example: $0 ce01issm D00001 dcl11 20150505.superv.log"
+    echo "     example: $0 ce02shsm D00001 dcl11 20150505.superv.log"
     exit 1
 fi
 PLATFORM=${1,,}
@@ -19,16 +19,26 @@ DCL=${3,,}
 FILE=`/bin/basename $4`
 
 # Set the default directory paths
-RAW="/home/ooiuser/data/raw"
-PARSED="/home/ooiuser/data/parsed"
-BIN="/home/ooiuser/bin/cgsn-parsers/parsers"
-PYTHON="/opt/python2.7.11/bin/python"
+RAW="/webdata/cgsn/data/raw"
+PARSED="/webdata/cgsn/data/proc"
+BIN="/home/cgsnmo/dev/cgsn-parsers/cgsn_parsers/parsers"
+PYTHON="/home/cgsnmo/anaconda3/envs/py27/bin/python"
 
 # Setup the input and output filenames as well as the absolute paths
-IN="$RAW/$PLATFORM/$DEPLOY/$DCL/superv/$FILE"
-OUT="$PARSED/$PLATFORM/$DEPLOY/superv/$DCL/${FILE%.log}.mat"
+if [ $DCL = "dcl11" ] || [ $DCL = "dcl12" ] || [ $DCL = "dcl17" ]; then
+    pltfrm="buoy"
+elif [ $DCL = "dcl26" ] || [ $DCL = "dcl27" ] || [ $DCL = "dcl16" ]; then
+    pltfrm="nsif"
+else
+    pltfrm="mfn"
+fi
+IN="$RAW/$PLATFORM/$DEPLOY/cg_data/$DCL/superv/$FILE"
+OUT="$PARSED/$PLATFORM/$DEPLOY/$pltfrm/superv/$DCL/${FILE%.log}.json"
+if [ ! -d `/usr/bin/dirname $OUT` ]; then
+    mkdir -p `/usr/bin/dirname $OUT`
+fi
 
 # Parse the file
 if [ -e $IN ]; then
-    $PYTHON $BIN/parse_superv_dcl.py -i $IN -o $OUT
+    $PYTHON -m $BIN/parse_superv_dcl -i $IN -o $OUT
 fi

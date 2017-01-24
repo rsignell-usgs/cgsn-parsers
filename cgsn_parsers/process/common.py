@@ -58,7 +58,7 @@ def inputs():
     parser.add_argument("-i", "--infile", dest="infile", type=str, required=True)
     parser.add_argument("-o", "--outfile", dest="outfile", type=str, required=True)
     parser.add_argument("-c", "--coeff_file", dest="coeff_file", type=str, required=False)
-    parser.add_argument("-f", "--devfile", dest="devfile", type=str, required=False)
+    parser.add_argument("-d", "--devfile", dest="devfile", type=str, required=False)
     parser.add_argument("-u", "--csvurl", dest="csvurl", type=str, required=False)
     parser.add_argument("-s", "--switch", dest="switch", type=int, default=0)
 

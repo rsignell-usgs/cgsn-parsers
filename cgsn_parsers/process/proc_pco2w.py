@@ -110,7 +110,7 @@ def main():
         raise Exception('A source for the PCO2W calibration coefficients could not be found')
 
     # check for the source of instrument blanks and load accordingly
-    blank = Blanks(blnk_file, np.nan, np.nan) # initialize the calibration class
+    blank = Blanks(blnk_file, 1.0, 1.0) # initialize the calibration class using default blank
     if os.path.isfile(blnk_file):
         blank.load_blanks()
     else:

@@ -45,7 +45,7 @@ case "$PLATFORM" in
         declare -a OPTAA1=("optaa1" "OPTAAD/CGINS-OPTAAD-00124__20160920")
         declare -a PHSEN1=("phsen1" "None")
 
-        declare -a OPTAA2=("optaa2" "OPTAAD/CGINS-OPTAAD-00266__20160920")
+        declare -a OPTAA2=("optaa2" "OPTAAC/CGINS-OPTAAC-00266__20160920")
         declare -a PCO2W=("pco2w" "PCO2WB/CGINS-PCO2WB-C0062__20160920")
         declare -a PHSEN2=("phsen2" "None")
         ;;

@@ -11,8 +11,7 @@ import re
 from struct import unpack
 
 # Import common utilites and base classes
-from cgsn_parsers.parsers.common import ParserCommon
-from cgsn_parsers.parsers.common import logfilename_to_epoch, inputs, LOGFILENAME_TIMESTAMP
+from cgsn_parsers.parsers.common import ParserCommon, logfilename_to_epoch, inputs, LOGFILENAME_TIMESTAMP
 
 # Regex pattern for the start of a binary OPTAA (ac-s) data packet
 PATTERN = b'(\xff\x00\xff\x00)'
@@ -154,8 +153,6 @@ class Parser(ParserCommon):
         return checksum == unpack('>H', packet[-3:-1])[0]
 
 if __name__ == '__main__':
-    # usage: parse_optaa.py -i INFILE -o OUTFILE
-
     # load the input arguments
     args = inputs()
     infile = os.path.abspath(args.infile)

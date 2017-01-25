@@ -8,7 +8,6 @@
 '''
 import os
 import re
-import scipy.io as sio
 
 from munch import Munch as Bunch
 from calendar import timegm
@@ -350,6 +349,7 @@ if __name__ == '__main__':
     velpt.parse_velocity()
     velpt.parse_diagnostics()
 
-    # write the resulting Bunch object via the toDict method to a matlab
-    # formatted structured array.
-    sio.savemat(outfile, velpt.data.toDict())
+    # write the resulting Bunch object via the toJSON method to a JSON
+    # formatted data file (note, no pretty-printing keeping things compact)
+    with open(outfile, 'w') as f:
+        f.write(velpt.data.toJSON())

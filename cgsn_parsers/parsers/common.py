@@ -19,6 +19,7 @@ DCL_TIMESTAMP = r'(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})'
 LOGFILENAME_TIMESTAMP = (r'(\d{8}_\d{6})' + '\.' + '.+' + '\.' + 'log')
 FLOAT = r'([+-]?\d+.\d+[Ee]?[+-]?\d*)'  # includes scientific notation
 FLTNAN = r'([+-]?\d+.\d+[Ee]?[+-]?\d*|NaN)'
+STRING = r'(\S+)'
 INTEGER = r'([+-]?[0-9]+)'
 NEWLINE = r'(?:\r\n|\n)?'
 

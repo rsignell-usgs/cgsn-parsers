@@ -16,7 +16,7 @@ DEPLOY=${2^^}
 TIME="-$3 day"
 FNAME=`/bin/date -u +%Y%m%d --date="$TIME"`
 
-PROC="/webdata/cgsn/data/raw"
+PROC="/webdata/cgsn/data/proc"
 PROCESS="/home/cgsnmo/dev/cgsn-parsers/utilities/processors"
 
 # Set some instrument names and processing flags based on the platform name
@@ -45,7 +45,7 @@ case "$PLATFORM" in
         declare -a OPTAA1=("optaa1" "OPTAAD/CGINS-OPTAAD-00124__20160920")
         declare -a PHSEN1=("phsen1" "None")
 
-        declare -a OPTAA2=("optaa2" "OPTAAC/CGINS-OPTAAC-00266__20160920")
+        declare -a OPTAA2=("optaa2" "OPTAAD/CGINS-OPTAAD-00266__20160920")
         declare -a PCO2W=("pco2w" "PCO2WB/CGINS-PCO2WB-C0062__20160920")
         declare -a PHSEN2=("phsen2" "None")
         ;;
@@ -67,15 +67,15 @@ esac
 #--> DOSTA
 #--> FLORT
 #--> NUTNR
-for optaa in $PROC/$PLATFORM/$DEPLOY/nsif/optaa/$FNAME*.$OPTAA1[0].json; do
+for optaa in $PROC/$PLATFORM/$DEPLOY/nsif/optaa/$FNAME*.${OPTAA1[0]}.json; do
     if [ -e $optaa ]; then
         SIZE=`du -k "$optaa" | cut -f1`
         if [ $SIZE > 0 ]; then
-            $PROCESS/process_optaa.sh $PLATFORM $DEPLOY "nsif/optaa" $OPTAA1[1] $optaa
+            $PROCESS/process_optaa.sh $PLATFORM $DEPLOY "nsif/optaa" ${OPTAA1[1]} $optaa
         fi
     fi
 done
-$PROCESS/process_phsen.sh $PLATFORM $DEPLOY "nsif/phsen" $FNAME.$PHSEN1.json
+$PROCESS/process_phsen.sh $PLATFORM $DEPLOY "nsif/phsen" $FNAME.${PHSEN1[0]}.json
 #--> SPKIR
 #--> UCSPP (acoustic modem communications with uCSPP)
 #--> VELPT
@@ -85,16 +85,16 @@ if [ $MFN_FLAG == 1 ]; then
     #--> ADCPT
     #--> CTDBP + DOSTA
     #--> CAMDS
-    for optaa in $PROC/$PLATFORM/$DEPLOY/mfn/optaa/$FNAME*.$OPTAA2[0].json; do
+    for optaa in $PROC/$PLATFORM/$DEPLOY/mfn/optaa/$FNAME*.${OPTAA2[0]}.json; do
         if [ -e $optaa ]; then
             SIZE=`du -k "$optaa" | cut -f1`
             if [ $SIZE > 0 ]; then
-                $PROCESS/process_optaa.sh $PLATFORM $DEPLOY "mfn/optaa" $OPTAA2[1] $optaa
+                $PROCESS/process_optaa.sh $PLATFORM $DEPLOY "mfn/optaa" ${OPTAA2[1]} $optaa
             fi
         fi
     done
-    $PROCESS/process_pco2w.sh $PLATFORM $DEPLOY "mfn/pco2w" $PCO2W[1] $FNAME.$PCO2W[0].json
-    $PROCESS/process_phsen.sh $PLATFORM $DEPLOY "mfn/phsen" $FNAME.$PHSEN2[0].json
+    $PROCESS/process_pco2w.sh $PLATFORM $DEPLOY "mfn/pco2w" ${PCO2W[1]} $FNAME.${PCO2W[0]}.json
+    $PROCESS/process_phsen.sh $PLATFORM $DEPLOY "mfn/phsen" $FNAME.${PHSEN2[0]}.json
     #--> PRESF
     #--> VEL3D
     #--> ZPLSC

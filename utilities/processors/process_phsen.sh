@@ -20,12 +20,12 @@ PHSEN=${3,,}
 FILE=`/bin/basename $4`
 
 # Set the default directory paths and input/output sources
-BIN="/home/cgsnmo/dev/cgsn-parsers/cgsn_parsers/processors"
+BIN="/home/cgsnmo/dev/cgsn-parsers/cgsn_parsers/process"
 PYTHON="/home/cgsnmo/anaconda3/envs/py27/bin/python"
 
 PROC="/webdata/cgsn/data/proc"
-IN="$PROC/$PLATFORM/$DEPLOY/$OPTAA/$FILE"
-OUT="$PROC/$PLATFORM/$DEPLOY/$OPTAA/${FILE%.json}.proc.json"
+IN="$PROC/$PLATFORM/$DEPLOY/$PHSEN/$FILE"
+OUT="$PROC/$PLATFORM/$DEPLOY/$PHSEN/${FILE%.json}.proc.json"
 
 # Process the file
 if [ -e $IN ]; then

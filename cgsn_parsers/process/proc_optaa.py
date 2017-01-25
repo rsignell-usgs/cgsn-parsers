@@ -281,7 +281,7 @@ def apply_scatcorr(optaa, method=1):
     optaa.apd_ts_s = apd_ts_s.tolist()
     return optaa
 
-if __name__ == '__main__':
+def main():
     # load the input arguments
     args = inputs()
     infile = os.path.abspath(args.infile)
@@ -313,6 +313,10 @@ if __name__ == '__main__':
     with open(infile, 'rb') as f:
         optaa = Munch(json.load(f))
 
+    if len(optaa.time) == 0:
+        # This is an empty file, end processing
+        return None
+
     # check the device file coefficients against the data file contents
     if dev.coeffs['serial_number'] != optaa.serial_number[0]:
         raise Exception('Serial Number mismatch between ac-s data and the device file.')
@@ -329,3 +333,6 @@ if __name__ == '__main__':
     # save the resulting data to a json formatted file
     with open(outfile, 'wb') as f:
         f.write(optaa.toJSON())
+
+if __name__ == '__main__':
+    main()

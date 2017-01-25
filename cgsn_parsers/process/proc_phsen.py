@@ -8,7 +8,6 @@
     calculate pH.
 '''
 import argparse
-import gsw
 import json
 import numpy as np
 import os
@@ -18,6 +17,7 @@ from datetime import datetime, timedelta
 from munch import Munch
 from pytz import timezone
 
+from ion_functions.data.ctd_functions import ctd_pracsal
 from ion_functions.data.ph_functions import ph_battery, ph_thermistor, ph_calc_phwater
 
 def inputs():
@@ -37,15 +37,15 @@ def inputs():
     # or that).
     parser.add_argument("-i", "--infile", dest="infile", type=str, required=True)
     parser.add_argument("-o", "--outfile", dest="outfile", type=str, required=True)
-    parser.add_argument("-s", "--salinity", dest="salinity", type=float, required=True, default=33.0)
-    parser.add_argument("-c", "--ctdfile", dest="ctdbp", type=str, required=False, default=None)
+    parser.add_argument("-s", "--salinity", dest="salinity", type=float, required=False, default=33.0)
+    parser.add_argument("-c", "--ctdfile", dest="ctdfile", type=str, required=False, default=None)
 
     # parse the input arguements and create a parser object
     args = parser.parse_args()
 
     return args
 
-if __name__ == '__main__':
+def main():
     # load  the input arguments
     args = inputs()
     infile = os.path.abspath(args.infile)
@@ -55,6 +55,10 @@ if __name__ == '__main__':
     with open(infile, 'rb') as f:
         phsen = Munch(json.load(f))
 
+    if len(phsen.time) == 0:
+        # This is an empty file, end processing
+        return None
+    
     # convert the raw battery voltage and thermistor values from counts
     # to V and degC, respectively
     phsen.thermistor_start = ph_thermistor(np.array(phsen.thermistor_start)).tolist()
@@ -117,7 +121,7 @@ if __name__ == '__main__':
         ctd = interpf(np.array(phsen.time))
 
         # calculate the salinity from the CTD data,
-        psu = gsw.SP_from_C(ctd[:, 0], ctd[:, 1], ctd[:, 2]).reshape((ctd.shape[0], 1))
+        psu = ctd_pracsal(ctd[:, 0], ctd[:, 1], ctd[:, 2]).reshape((ctd.shape[0], 1))
         ctd = np.hstack((ctd, psu))
     else:
         data = np.array((np.nan, np.nan, np.nan, args.salinity))
@@ -134,3 +138,6 @@ if __name__ == '__main__':
     # save the resulting data to a json formatted file
     with open(outfile, 'w') as f:
         f.write(phsen.toJSON())
+
+if __name__ == '__main__':
+    main()

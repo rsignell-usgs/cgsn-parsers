@@ -88,8 +88,7 @@ class Calibrations(Coefficients):
         # save the resulting dictionary
         self.coeffs = coeffs
 
-
-if __name__ == '__main__':
+def main():
     # load  the input arguments
     args = inputs()
     infile = os.path.abspath(args.infile)
@@ -111,7 +110,7 @@ if __name__ == '__main__':
         raise Exception('A source for the PCO2W calibration coefficients could not be found')
 
     # check for the source of instrument blanks and load accordingly
-    blank = Blanks(blnk_file, 1.0, 1.0) # initialize the calibration class
+    blank = Blanks(blnk_file, np.nan, np.nan) # initialize the calibration class
     if os.path.isfile(blnk_file):
         blank.load_blanks()
     else:
@@ -120,6 +119,10 @@ if __name__ == '__main__':
     # load the PCO2W data file
     with open(infile, 'rb') as f:
         pco2w = Munch(json.load(f))
+
+    if len(pco2w.time) == 0:
+        # This is an empty file, end processing
+        return None
 
     # convert the raw battery voltage and thermistor values from counts
     # to V and degC, respectively
@@ -171,7 +174,7 @@ if __name__ == '__main__':
                                      dev.coeffs['calb'],
                                      dev.coeffs['calc'],
                                      blank.blank_434,
-                                     blank.blank_620))
+                                     blank.blank_620)[0])
 
             # record the blanks used
             blank434.append(blank.blank_434)
@@ -194,3 +197,6 @@ if __name__ == '__main__':
 
     with open(outfile, 'w') as f:
         f.write(pco2w.toJSON())
+
+if __name__ == '__main__':
+    main()

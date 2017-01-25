@@ -23,7 +23,7 @@ CFILE=`/bin/basename $UID`
 FILE=`/bin/basename $5`
 
 # Set the default directory paths and input/output sources
-BIN="/home/cgsnmo/dev/cgsn-parsers/cgsn_parsers/processors"
+BIN="/home/cgsnmo/dev/cgsn-parsers/cgsn_parsers/process"
 PYTHON="/home/cgsnmo/anaconda3/envs/py27/bin/python"
 
 PROC="/webdata/cgsn/data/proc"
